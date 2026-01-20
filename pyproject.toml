@@ -40,6 +40,8 @@ dev = [
     "mypy>=1.0",
     "ruff>=0.1",
     "types-PyYAML",
+    "build",
+    "twine",
 ]
 
 [project.urls]
