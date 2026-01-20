@@ -1,4 +1,4 @@
-"""Core type definitions for tabula schemas.
+"""Core type definitions for aptoro schemas.
 
 This module defines the data structures used to represent schemas internally.
 """
@@ -130,18 +130,12 @@ class Schema:
     @property
     def required_fields(self) -> tuple[Field, ...]:
         """Get all required (non-optional, no default) fields."""
-        return tuple(
-            f for f in self.fields
-            if isinstance(f, Field) and f.is_required
-        )
+        return tuple(f for f in self.fields if isinstance(f, Field) and f.is_required)
 
     @property
     def optional_fields(self) -> tuple[Field, ...]:
         """Get all optional fields."""
-        return tuple(
-            f for f in self.fields
-            if isinstance(f, Field) and f.is_optional
-        )
+        return tuple(f for f in self.fields if isinstance(f, Field) and f.is_optional)
 
     @property
     def field_names(self) -> tuple[str, ...]:

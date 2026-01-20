@@ -5,9 +5,9 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, ValidationError as PydanticValidationError, create_model
 from pydantic.fields import FieldInfo
 
-from tabula.errors import FieldError, ValidationError
-from tabula.schema.types import BaseType, Field, FieldType, Schema
-from tabula.validation.dataclass_gen import create_instance, generate_dataclass
+from aptoro.errors import FieldError, ValidationError
+from aptoro.schema.types import BaseType, Field, FieldType, Schema
+from aptoro.validation.dataclass_gen import create_instance, generate_dataclass
 
 
 def _pydantic_type_for_field_type(field_type: FieldType) -> type:

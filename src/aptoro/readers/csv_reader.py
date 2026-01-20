@@ -4,7 +4,7 @@ import csv
 from io import StringIO
 from typing import Any
 
-from tabula.errors import SourceError
+from aptoro.errors import SourceError
 
 
 class CSVReader:

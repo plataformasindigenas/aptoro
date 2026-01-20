@@ -3,7 +3,7 @@
 import json
 from typing import Any
 
-from tabula.errors import SourceError
+from aptoro.errors import SourceError
 
 
 class JSONReader:
@@ -70,8 +70,6 @@ class JSONReader:
         result = []
         for i, record in enumerate(records):
             if not isinstance(record, dict):
-                raise SourceError(
-                    f"Record at index {i} is not an object: {type(record).__name__}"
-                )
+                raise SourceError(f"Record at index {i} is not an object: {type(record).__name__}")
             result.append(record)
         return result

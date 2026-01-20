@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from tabula.errors import ValidationError
-from tabula.schema import load_schema
-from tabula.validation import validate
+from aptoro.errors import ValidationError
+from aptoro.schema import load_schema
+from aptoro.validation import validate
 
 
 class TestValidation:

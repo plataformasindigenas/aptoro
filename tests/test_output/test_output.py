@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from tabula import load, to_dicts, to_json
+from aptoro import load, to_dicts, to_json
 
 
 class TestToJson:

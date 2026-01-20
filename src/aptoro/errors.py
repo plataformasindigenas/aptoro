@@ -1,24 +1,24 @@
-"""Exception hierarchy for tabula.
+"""Exception hierarchy for aptoro.
 
-All exceptions inherit from TabulaError for easy catching.
+All exceptions inherit from AptoroError for easy catching.
 """
 
 from dataclasses import dataclass, field
 
 
-class TabulaError(Exception):
-    """Base exception for all tabula errors."""
+class AptoroError(Exception):
+    """Base exception for all aptoro errors."""
 
     pass
 
 
-class SchemaError(TabulaError):
+class SchemaError(AptoroError):
     """Raised when a schema definition is invalid."""
 
     pass
 
 
-class SourceError(TabulaError):
+class SourceError(AptoroError):
     """Raised when a data source cannot be read or parsed."""
 
     pass
@@ -44,7 +44,7 @@ class FieldError:
 
 
 @dataclass
-class ValidationError(TabulaError):
+class ValidationError(AptoroError):
     """Raised when data does not match the schema.
 
     Contains detailed information about all validation failures.
@@ -81,7 +81,9 @@ class ValidationError(TabulaError):
         column: str | None = None,
     ) -> None:
         """Add a field error to the collection."""
-        self.errors.append(FieldError(field=field, expected=expected, got=got, row=row, column=column))
+        self.errors.append(
+            FieldError(field=field, expected=expected, got=got, row=row, column=column)
+        )
 
     def has_errors(self) -> bool:
         """Check if there are any errors."""

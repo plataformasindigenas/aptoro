@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field as dataclass_field, make_dataclass
 from typing import Any, get_type_hints
 
-from tabula.schema.types import BaseType, Field, FieldType, NestedField, Schema
+from aptoro.schema.types import BaseType, Field, FieldType, NestedField, Schema
 
 
 def _python_type_for_field_type(field_type: FieldType) -> type:
@@ -44,7 +44,11 @@ def _make_field_spec(f: Field) -> tuple[str, type, Any]:
         default = f.default
         # Mutable defaults need field(default_factory=...)
         if isinstance(default, (list, dict)):
-            return (f.name, python_type, dataclass_field(default_factory=lambda d=default: d.copy()))
+            return (
+                f.name,
+                python_type,
+                dataclass_field(default_factory=lambda d=default: d.copy()),
+            )
         return (f.name, python_type, default)
     elif f.is_optional:
         return (f.name, python_type, None)

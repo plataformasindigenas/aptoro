@@ -16,8 +16,8 @@ from typing import Any
 
 import yaml
 
-from tabula.errors import SchemaError
-from tabula.schema.types import BaseType, Field, FieldType, NestedField, Schema
+from aptoro.errors import SchemaError
+from aptoro.schema.types import BaseType, Field, FieldType, NestedField, Schema
 
 # Regex patterns for type parsing
 TYPE_PATTERN = re.compile(
@@ -164,9 +164,7 @@ def _parse_field(name: str, value: Any) -> Field | NestedField:
             # Nested list structure
             items = value["items"]
             if isinstance(items, dict):
-                nested_fields = tuple(
-                    _parse_field(n, v) for n, v in items.items()
-                )
+                nested_fields = tuple(_parse_field(n, v) for n, v in items.items())
                 return NestedField(
                     name=name,
                     is_list=True,
@@ -179,7 +177,9 @@ def _parse_field(name: str, value: Any) -> Field | NestedField:
             "Nested fields must have 'type: list' and 'items' keys."
         )
 
-    raise SchemaError(f"Invalid field value for {name!r}: expected string or dict, got {type(value).__name__}")
+    raise SchemaError(
+        f"Invalid field value for {name!r}: expected string or dict, got {type(value).__name__}"
+    )
 
 
 def parse_schema(data: dict[str, Any], base_path: Path | None = None) -> Schema:

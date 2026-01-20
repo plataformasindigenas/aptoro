@@ -4,7 +4,7 @@ from typing import Any
 
 import yaml
 
-from tabula.errors import SourceError
+from aptoro.errors import SourceError
 
 
 class YAMLReader:
@@ -74,8 +74,6 @@ class YAMLReader:
         result = []
         for i, record in enumerate(records):
             if not isinstance(record, dict):
-                raise SourceError(
-                    f"Record at index {i} is not a mapping: {type(record).__name__}"
-                )
+                raise SourceError(f"Record at index {i} is not a mapping: {type(record).__name__}")
             result.append(record)
         return result

@@ -3,7 +3,7 @@
 import tomllib
 from typing import Any
 
-from tabula.errors import SourceError
+from aptoro.errors import SourceError
 
 
 class TOMLReader:
@@ -77,8 +77,6 @@ class TOMLReader:
         result = []
         for i, record in enumerate(records):
             if not isinstance(record, dict):
-                raise SourceError(
-                    f"Record at index {i} is not a table: {type(record).__name__}"
-                )
+                raise SourceError(f"Record at index {i} is not a table: {type(record).__name__}")
             result.append(record)
         return result

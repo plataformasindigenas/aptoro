@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from tabula.errors import SchemaError
-from tabula.schema import load_schema
-from tabula.schema.parser import parse_type_string
-from tabula.schema.types import BaseType
+from aptoro.errors import SchemaError
+from aptoro.schema import load_schema
+from aptoro.schema.parser import parse_type_string
+from aptoro.schema.types import BaseType
 
 
 class TestParseTypeString:

@@ -2,12 +2,12 @@
 
 from typing import Any
 
-from tabula.errors import SourceError
-from tabula.readers.base import Reader, detect_format, fetch_content
-from tabula.readers.csv_reader import CSVReader
-from tabula.readers.json_reader import JSONReader
-from tabula.readers.toml_reader import TOMLReader
-from tabula.readers.yaml_reader import YAMLReader
+from aptoro.errors import SourceError
+from aptoro.readers.base import Reader, detect_format, fetch_content
+from aptoro.readers.csv_reader import CSVReader
+from aptoro.readers.json_reader import JSONReader
+from aptoro.readers.toml_reader import TOMLReader
+from aptoro.readers.yaml_reader import YAMLReader
 
 __all__ = [
     "CSVReader",

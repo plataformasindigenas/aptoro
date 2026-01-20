@@ -5,7 +5,7 @@ from urllib.request import urlopen
 from urllib.error import URLError
 from pathlib import Path
 
-from tabula.errors import SourceError
+from aptoro.errors import SourceError
 
 
 class Reader(Protocol):
@@ -98,6 +98,5 @@ def detect_format(source: str) -> str:
         return "toml"
 
     raise SourceError(
-        f"Cannot detect format from source: {source}. "
-        "Please specify format explicitly."
+        f"Cannot detect format from source: {source}. Please specify format explicitly."
     )

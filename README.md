@@ -1,17 +1,19 @@
-# Tabula
+# Aptoro
+
+Aptoro is a Xavante word for "preparing the arrows for hunting".
 
 A minimal, functional Python ETL library for reading, validating, and transforming data using YAML schemas.
 
 ## Installation
 
 ```bash
-pip install tabula
+pip install aptoro
 ```
 
 ## Quick Start
 
 ```python
-from tabula import load, load_schema, read, validate, to_json
+from aptoro import load, load_schema, read, validate, to_json
 
 # All-in-one: read + validate
 entries = load(source="data.csv", schema="schema.yaml")

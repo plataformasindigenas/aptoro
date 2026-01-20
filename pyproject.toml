@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "tabula"
+name = "aptoro"
 version = "0.1.0"
 description = "A minimal, functional Python ETL library for reading, validating, and transforming data using YAML schemas"
 readme = "README.md"
@@ -42,12 +42,12 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/plataformas-indigenas/tabula"
-Documentation = "https://github.com/plataformas-indigenas/tabula#readme"
-Repository = "https://github.com/plataformas-indigenas/tabula"
+Homepage = "https://github.com/plataformasindigenas/aptoro"
+Documentation = "https://github.com/plataformasindigenas/aptoro#readme"
+Repository = "https://github.com/plataformasindigenas/aptoro"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/tabula"]
+packages = ["src/aptoro"]
 
 [tool.ruff]
 target-version = "py311"

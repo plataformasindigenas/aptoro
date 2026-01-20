@@ -1,10 +1,10 @@
-"""Tabula - A minimal, functional Python ETL library.
+"""Aptoro - A minimal, functional Python ETL library.
 
-Tabula reads data from various sources (CSV, JSON, YAML, TOML),
+Aptoro reads data from various sources (CSV, JSON, YAML, TOML),
 validates it against YAML schemas, and returns typed dataclasses.
 
 Example:
-    >>> from tabula import load, load_schema, read, validate, to_json
+    >>> from aptoro import load, load_schema, read, validate, to_json
     >>>
     >>> # All-in-one: read + validate
     >>> entries = load(source="data.csv", schema="schema.yaml")
@@ -20,11 +20,11 @@ Example:
 
 from typing import Any
 
-from tabula.errors import SchemaError, SourceError, TabulaError, ValidationError
-from tabula.output import to_dicts, to_json
-from tabula.readers import read
-from tabula.schema import Schema, load_schema
-from tabula.validation import validate
+from aptoro.errors import SchemaError, SourceError, AptoroError, ValidationError
+from aptoro.output import to_dicts, to_json
+from aptoro.readers import read
+from aptoro.schema import Schema, load_schema
+from aptoro.validation import validate
 
 __version__ = "0.1.0"
 
@@ -42,7 +42,7 @@ __all__ = [
     # Errors
     "SchemaError",
     "SourceError",
-    "TabulaError",
+    "AptoroError",
     "ValidationError",
     # Version
     "__version__",

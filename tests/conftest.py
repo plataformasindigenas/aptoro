@@ -1,4 +1,4 @@
-"""Pytest fixtures for tabula tests."""
+"""Pytest fixtures for aptoro tests."""
 
 from pathlib import Path
 

@@ -1,10 +1,10 @@
-"""Integration tests for tabula."""
+"""Integration tests for aptoro."""
 
 from pathlib import Path
 
 import pytest
 
-from tabula import load, load_schema, read, to_dicts, to_json, validate
+from aptoro import load, load_schema, read, to_dicts, to_json, validate
 
 
 class TestFullPipeline:

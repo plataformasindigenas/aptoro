@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from tabula.errors import SourceError
-from tabula.readers import CSVReader, JSONReader, YAMLReader, read
-from tabula.readers.base import detect_format
+from aptoro.errors import SourceError
+from aptoro.readers import CSVReader, JSONReader, YAMLReader, read
+from aptoro.readers.base import detect_format
 
 
 class TestDetectFormat:

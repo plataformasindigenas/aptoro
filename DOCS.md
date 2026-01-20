@@ -1,8 +1,8 @@
-# Tabula Documentation
+# Aptoro Documentation
 
 **Version 0.1.0**
 
-Tabula is a minimal, functional Python ETL library for reading, validating, and transforming data using YAML schemas. It was designed for linguistic data projects but works with any tabular data.
+Aptoro is a minimal, functional Python ETL library for reading, validating, and transforming data using YAML schemas. It was designed for linguistic data projects but works with any tabular data.
 
 ---
 
@@ -39,7 +39,7 @@ Tabula is a minimal, functional Python ETL library for reading, validating, and 
 
 ## Philosophy
 
-Tabula follows three core principles:
+Aptoro follows three core principles:
 
 1. **Smart defaults, expert configurability**: The library assumes sensible defaults (fields are required, no default values) while allowing full control when needed. You write less YAML for common cases.
 
@@ -52,13 +52,13 @@ Tabula follows three core principles:
 ## Installation
 
 ```bash
-pip install tabula
+pip install aptoro
 ```
 
 For development:
 
 ```bash
-pip install tabula[dev]
+pip install aptoro[dev]
 ```
 
 **Requirements**: Python 3.11+
@@ -68,7 +68,7 @@ pip install tabula[dev]
 ## Quick Start
 
 ```python
-from tabula import load
+from aptoro import load
 
 # Define a schema (schema.yaml)
 """
@@ -91,7 +91,7 @@ for person in people:
 **Step-by-step approach:**
 
 ```python
-from tabula import load_schema, read, validate, to_json
+from aptoro import load_schema, read, validate, to_json
 
 # 1. Load schema
 schema = load_schema("schema.yaml")
@@ -271,7 +271,7 @@ fields:
 ### Reading from URLs
 
 ```python
-from tabula import read
+from aptoro import read
 
 # HTTP/HTTPS URLs
 data = read("https://example.com/data.csv")
@@ -281,7 +281,7 @@ data = read("https://api.example.com/export.json")
 ### Reading from Files
 
 ```python
-from tabula import read
+from aptoro import read
 
 # Local files (absolute or relative paths)
 data = read("./data/records.csv")
@@ -300,7 +300,7 @@ data = read("https://api.example.com/export", format="json")
 **CSV options:**
 
 ```python
-from tabula.readers import CSVReader
+from aptoro.readers import CSVReader
 
 reader = CSVReader(
     delimiter=";",        # Field separator (default: ",")
@@ -313,7 +313,7 @@ data = reader.read(content)
 **JSON/YAML with custom data key:**
 
 ```python
-from tabula.readers import JSONReader
+from aptoro.readers import JSONReader
 
 # For {"results": [...]} instead of {"data": [...]}
 reader = JSONReader(data_key="results")
@@ -327,7 +327,7 @@ data = reader.read(content)
 ### Basic Validation
 
 ```python
-from tabula import load_schema, validate
+from aptoro import load_schema, validate
 
 schema = load_schema("schema.yaml")
 data = [
@@ -356,7 +356,7 @@ except ValidationError as e:
 
 ### Error Messages
 
-Tabula provides clear, actionable error messages:
+Aptoro provides clear, actionable error messages:
 
 ```
 ValidationError: Validation failed with 2 error(s)
@@ -383,7 +383,7 @@ Error 2/2:
 ### To JSON
 
 ```python
-from tabula import to_json
+from aptoro import to_json
 
 json_string = to_json(records)                    # Pretty-printed (indent=2)
 json_compact = to_json(records, indent=None)      # Compact
@@ -393,7 +393,7 @@ json_ascii = to_json(records, ensure_ascii=True)  # Escape non-ASCII
 ### To Dictionaries
 
 ```python
-from tabula import to_dicts
+from aptoro import to_dicts
 
 dict_list = to_dicts(records)
 # [{'id': '1', 'name': 'Alice', ...}, ...]
@@ -483,11 +483,11 @@ schema.has_field("name")  # Check if field exists
 
 ## Error Types
 
-All errors inherit from `TabulaError`:
+All errors inherit from `AptoroError`:
 
 ```python
-from tabula.errors import (
-    TabulaError,       # Base exception
+from aptoro.errors import (
+    AptoroError,       # Base exception
     SchemaError,       # Invalid schema definition
     SourceError,       # Cannot read/parse source
     ValidationError,   # Data doesn't match schema
@@ -540,7 +540,7 @@ fields:
 ```
 
 ```python
-from tabula import load, to_json
+from aptoro import load, to_json
 
 entries = load(
     "https://example.com/bororo-dictionary.csv",
@@ -557,7 +557,7 @@ print(to_json(verbs))
 ### Data Pipeline
 
 ```python
-from tabula import load_schema, read, validate, to_json
+from aptoro import load_schema, read, validate, to_json
 
 def process_linguistic_data(source_url: str, schema_path: str) -> str:
     """Load, validate, and transform linguistic data."""
@@ -649,7 +649,7 @@ The linguistic/academic context often involves environments with limited package
 
 ### Type Coercion
 
-Tabula coerces types when reasonable:
+Aptoro coerces types when reasonable:
 - Numbers to strings: `42` → `"42"` (for str fields)
 - Strings to numbers: `"42"` → `42` (for int fields)
 - Various bool representations: `"true"`, `"yes"`, `"1"` → `True`
@@ -664,4 +664,4 @@ MIT
 
 ---
 
-*Documentation for Tabula v0.1.0 — A project of Plataformas Indígenas*
+*Documentation for Aptoro v0.1.0 — A project of Plataformas Indígenas*
