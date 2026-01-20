@@ -1,0 +1,19 @@
+[
+  {
+    "id": "1",
+    "lemma": "hello",
+    "pos": "noun",
+    "definition": "a greeting",
+    "definition_pt": "uma saudação",
+    "frequency": 10
+  },
+  {
+    "id": "2",
+    "lemma": "run",
+    "pos": "verb",
+    "definition": "to move quickly",
+    "definition_pt": "correr",
+    "examples": ["I run every day", "She runs fast"],
+    "frequency": 5
+  }
+]

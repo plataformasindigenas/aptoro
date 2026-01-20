@@ -1,0 +1,7 @@
+name: base_entry
+description: Base schema for inheritance testing
+
+fields:
+  id: str
+  created_at: str?
+  updated_at: str?

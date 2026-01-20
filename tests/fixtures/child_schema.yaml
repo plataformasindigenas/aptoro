@@ -1,0 +1,7 @@
+name: child_entry
+description: Child schema that extends base
+extends: base_schema.yaml
+
+fields:
+  name: str
+  value: int = 0

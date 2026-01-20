@@ -1,0 +1,4 @@
+id,lemma,pos,definition,definition_pt,examples,frequency
+1,hello,noun,a greeting,uma saudação,,10
+2,run,verb,to move quickly,correr,,5
+3,big,adj,of large size,grande,,8

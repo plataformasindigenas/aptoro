@@ -1,0 +1,13 @@
+name: lexicon_entry
+description: Dictionary entries for testing
+version: "1.0"
+primary_key: id
+
+fields:
+  id: str
+  lemma: str
+  pos: str[noun|verb|adj|adv]
+  definition: str
+  definition_pt: str?
+  examples: list[str]?
+  frequency: int = 0
