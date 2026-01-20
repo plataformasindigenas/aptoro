@@ -12,32 +12,32 @@ from aptoro.readers.base import detect_format
 class TestDetectFormat:
     """Tests for format detection."""
 
-    def test_csv_extension(self):
+    def test_csv_extension(self) -> None:
         assert detect_format("data.csv") == "csv"
         assert detect_format("https://example.com/data.csv") == "csv"
 
-    def test_json_extension(self):
+    def test_json_extension(self) -> None:
         assert detect_format("data.json") == "json"
 
-    def test_yaml_extension(self):
+    def test_yaml_extension(self) -> None:
         assert detect_format("data.yaml") == "yaml"
         assert detect_format("data.yml") == "yaml"
 
-    def test_toml_extension(self):
+    def test_toml_extension(self) -> None:
         assert detect_format("data.toml") == "toml"
 
-    def test_unknown_extension(self):
+    def test_unknown_extension(self) -> None:
         with pytest.raises(SourceError, match="Cannot detect format"):
             detect_format("data.txt")
 
-    def test_strips_query_params(self):
+    def test_strips_query_params(self) -> None:
         assert detect_format("https://example.com/data.csv?token=abc") == "csv"
 
 
 class TestCSVReader:
     """Tests for CSV reader."""
 
-    def test_read_simple_csv(self):
+    def test_read_simple_csv(self) -> None:
         reader = CSVReader()
         content = "name,age\nAlice,30\nBob,25"
         records = reader.read(content)
@@ -45,13 +45,13 @@ class TestCSVReader:
         assert records[0]["name"] == "Alice"
         assert records[0]["age"] == 30  # Type inferred
 
-    def test_read_with_empty_values(self):
+    def test_read_with_empty_values(self) -> None:
         reader = CSVReader()
         content = "name,age\nAlice,\nBob,25"
         records = reader.read(content)
         assert records[0]["age"] is None
 
-    def test_read_without_type_inference(self):
+    def test_read_without_type_inference(self) -> None:
         reader = CSVReader(infer_types=False)
         content = "name,age\nAlice,30"
         records = reader.read(content)
@@ -61,26 +61,26 @@ class TestCSVReader:
 class TestJSONReader:
     """Tests for JSON reader."""
 
-    def test_read_array(self):
+    def test_read_array(self) -> None:
         reader = JSONReader()
         content = '[{"name": "Alice"}, {"name": "Bob"}]'
         records = reader.read(content)
         assert len(records) == 2
         assert records[0]["name"] == "Alice"
 
-    def test_read_with_data_key(self):
+    def test_read_with_data_key(self) -> None:
         reader = JSONReader()
         content = '{"data": [{"name": "Alice"}]}'
         records = reader.read(content)
         assert len(records) == 1
 
-    def test_read_with_custom_key(self):
+    def test_read_with_custom_key(self) -> None:
         reader = JSONReader(data_key="items")
         content = '{"items": [{"name": "Alice"}]}'
         records = reader.read(content)
         assert len(records) == 1
 
-    def test_invalid_json(self):
+    def test_invalid_json(self) -> None:
         reader = JSONReader()
         with pytest.raises(SourceError, match="JSON parsing error"):
             reader.read("not valid json")
@@ -89,13 +89,13 @@ class TestJSONReader:
 class TestYAMLReader:
     """Tests for YAML reader."""
 
-    def test_read_sequence(self):
+    def test_read_sequence(self) -> None:
         reader = YAMLReader()
         content = "- name: Alice\n- name: Bob"
         records = reader.read(content)
         assert len(records) == 2
 
-    def test_read_with_data_key(self):
+    def test_read_with_data_key(self) -> None:
         reader = YAMLReader()
         content = "data:\n  - name: Alice"
         records = reader.read(content)
@@ -105,16 +105,16 @@ class TestYAMLReader:
 class TestReadFunction:
     """Tests for the main read function."""
 
-    def test_read_csv_file(self, sample_csv_path: Path):
+    def test_read_csv_file(self, sample_csv_path: Path) -> None:
         records = read(str(sample_csv_path))
         assert len(records) == 3
         assert records[0]["lemma"] == "hello"
 
-    def test_read_json_file(self, sample_json_path: Path):
+    def test_read_json_file(self, sample_json_path: Path) -> None:
         records = read(str(sample_json_path))
         assert len(records) == 2
         assert records[0]["lemma"] == "hello"
 
-    def test_read_with_explicit_format(self, sample_csv_path: Path):
+    def test_read_with_explicit_format(self, sample_csv_path: Path) -> None:
         records = read(str(sample_csv_path), format="csv")
         assert len(records) == 3

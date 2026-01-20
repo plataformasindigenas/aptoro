@@ -9,7 +9,7 @@ from aptoro import load, to_dicts, to_json
 class TestToJson:
     """Tests for to_json function."""
 
-    def test_to_json_basic(self, sample_schema_path: Path, sample_json_path: Path):
+    def test_to_json_basic(self, sample_schema_path: Path, sample_json_path: Path) -> None:
         records = load(str(sample_json_path), str(sample_schema_path))
         json_str = to_json(records)
 
@@ -18,14 +18,14 @@ class TestToJson:
         assert isinstance(data, list)
         assert len(data) == 2
 
-    def test_to_json_compact(self, sample_schema_path: Path, sample_json_path: Path):
+    def test_to_json_compact(self, sample_schema_path: Path, sample_json_path: Path) -> None:
         records = load(str(sample_json_path), str(sample_schema_path))
         json_str = to_json(records, indent=None)
 
         # Should be compact (no newlines in simple case)
         assert "\n" not in json_str or json_str.count("\n") == 0
 
-    def test_to_json_preserves_data(self, sample_schema_path: Path, sample_json_path: Path):
+    def test_to_json_preserves_data(self, sample_schema_path: Path, sample_json_path: Path) -> None:
         records = load(str(sample_json_path), str(sample_schema_path))
         json_str = to_json(records)
         data = json.loads(json_str)
@@ -37,7 +37,7 @@ class TestToJson:
 class TestToDicts:
     """Tests for to_dicts function."""
 
-    def test_to_dicts_basic(self, sample_schema_path: Path, sample_json_path: Path):
+    def test_to_dicts_basic(self, sample_schema_path: Path, sample_json_path: Path) -> None:
         records = load(str(sample_json_path), str(sample_schema_path))
         dicts = to_dicts(records)
 
@@ -45,7 +45,9 @@ class TestToDicts:
         assert all(isinstance(d, dict) for d in dicts)
         assert len(dicts) == 2
 
-    def test_to_dicts_preserves_data(self, sample_schema_path: Path, sample_json_path: Path):
+    def test_to_dicts_preserves_data(
+        self, sample_schema_path: Path, sample_json_path: Path
+    ) -> None:
         records = load(str(sample_json_path), str(sample_schema_path))
         dicts = to_dicts(records)
 

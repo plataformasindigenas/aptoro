@@ -1,9 +1,9 @@
 """Base reader protocol and utilities."""
 
-from typing import Any, Protocol
-from urllib.request import urlopen
-from urllib.error import URLError
 from pathlib import Path
+from typing import Any, Protocol
+from urllib.error import URLError
+from urllib.request import urlopen
 
 from aptoro.errors import SourceError
 
@@ -50,7 +50,7 @@ def _fetch_url(url: str) -> str:
     try:
         with urlopen(url, timeout=30) as response:
             charset = response.headers.get_content_charset() or "utf-8"
-            return response.read().decode(charset)
+            return str(response.read().decode(charset))
     except URLError as e:
         raise SourceError(f"Cannot fetch URL {url}: {e}")
     except TimeoutError:

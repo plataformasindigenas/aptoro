@@ -2,15 +2,13 @@
 
 from pathlib import Path
 
-import pytest
-
 from aptoro import load, load_schema, read, to_dicts, to_json, validate
 
 
 class TestFullPipeline:
     """End-to-end integration tests."""
 
-    def test_load_csv_and_validate(self, sample_schema_path: Path, sample_csv_path: Path):
+    def test_load_csv_and_validate(self, sample_schema_path: Path, sample_csv_path: Path) -> None:
         """Test the full pipeline with CSV data."""
         records = load(str(sample_csv_path), str(sample_schema_path))
 
@@ -22,7 +20,7 @@ class TestFullPipeline:
         assert records[2].lemma == "big"
         assert records[2].pos == "adj"
 
-    def test_load_json_and_validate(self, sample_schema_path: Path, sample_json_path: Path):
+    def test_load_json_and_validate(self, sample_schema_path: Path, sample_json_path: Path) -> None:
         """Test the full pipeline with JSON data."""
         records = load(str(sample_json_path), str(sample_schema_path))
 
@@ -30,7 +28,7 @@ class TestFullPipeline:
         assert records[0].lemma == "hello"
         assert records[1].examples == ["I run every day", "She runs fast"]
 
-    def test_step_by_step_pipeline(self, sample_schema_path: Path, sample_csv_path: Path):
+    def test_step_by_step_pipeline(self, sample_schema_path: Path, sample_csv_path: Path) -> None:
         """Test using individual functions."""
         # Step 1: Load schema
         schema = load_schema(sample_schema_path)
@@ -51,7 +49,7 @@ class TestFullPipeline:
         dicts = to_dicts(records)
         assert dicts[0]["lemma"] == "hello"
 
-    def test_schema_with_inheritance(self, child_schema_path: Path):
+    def test_schema_with_inheritance(self, child_schema_path: Path) -> None:
         """Test that schema inheritance works correctly."""
         schema = load_schema(child_schema_path)
 
@@ -63,8 +61,10 @@ class TestFullPipeline:
         assert schema.has_field("name")
         assert schema.has_field("value")
 
+        from typing import Any
+
         # Validate data
-        data = [
+        data: list[dict[str, Any]] = [
             {
                 "id": "1",
                 "name": "test",
@@ -82,7 +82,7 @@ class TestFullPipeline:
 class TestRealWorldScenarios:
     """Tests simulating real-world usage patterns."""
 
-    def test_linguistic_dictionary_entry(self, fixtures_dir: Path):
+    def test_linguistic_dictionary_entry(self, fixtures_dir: Path) -> None:
         """Test with realistic linguistic dictionary data."""
         # Create a more complex schema inline
         schema_content = """
@@ -106,7 +106,9 @@ fields:
         try:
             schema = load_schema(schema_path)
 
-            data = [
+            from typing import Any
+
+            data: list[dict[str, Any]] = [
                 {
                     "id": "boe001",
                     "lemma": "boe",

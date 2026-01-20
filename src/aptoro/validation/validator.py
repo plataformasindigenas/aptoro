@@ -2,7 +2,8 @@
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, ValidationError as PydanticValidationError, create_model
+from pydantic import BaseModel, ConfigDict, create_model
+from pydantic import ValidationError as PydanticValidationError
 from pydantic.fields import FieldInfo
 
 from aptoro.errors import FieldError, ValidationError
@@ -30,7 +31,7 @@ def _pydantic_type_for_field_type(field_type: FieldType) -> type:
     if field_type.base == BaseType.LIST:
         if field_type.item_type:
             item_type = _pydantic_type_for_field_type(field_type.item_type)
-            python_type = list[item_type]  # type: ignore
+            python_type: type = list[item_type]  # type: ignore
         else:
             python_type = list
     else:
@@ -63,10 +64,10 @@ def _create_pydantic_model(schema: Schema) -> type[BaseModel]:
     # Create model class name
     model_name = "".join(word.capitalize() for word in schema.name.split("_")) + "Model"
 
-    return create_model(
+    return create_model(  # type: ignore
         model_name,
         __config__=ConfigDict(strict=False, extra="ignore", coerce_numbers_to_str=True),
-        **field_definitions,  # type: ignore
+        **field_definitions,
     )
 
 
@@ -152,7 +153,9 @@ def validate(
 
         except PydanticValidationError as e:
             for error in e.errors():
-                field_error = _convert_pydantic_error(error, row_index=i + 1)
+                # Cast the error to dict[str, Any] as that's what we expect
+                error_dict: dict[str, Any] = dict(error)
+                field_error = _convert_pydantic_error(error_dict, row_index=i + 1)
                 validation_error.add_error(
                     field=field_error.field,
                     expected=field_error.expected,

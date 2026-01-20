@@ -74,4 +74,4 @@ fields:
 
 ## License
 
-MIT
+GNU General Public License v3 (GPLv3)

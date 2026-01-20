@@ -20,7 +20,7 @@ Example:
 
 from typing import Any
 
-from aptoro.errors import SchemaError, SourceError, AptoroError, ValidationError
+from aptoro.errors import AptoroError, SchemaError, SourceError, ValidationError
 from aptoro.output import to_dicts, to_json
 from aptoro.readers import read
 from aptoro.schema import Schema, load_schema

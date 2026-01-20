@@ -12,7 +12,7 @@ from aptoro.validation import validate
 class TestValidation:
     """Tests for the validate function."""
 
-    def test_validate_valid_data(self, sample_schema_path: Path):
+    def test_validate_valid_data(self, sample_schema_path: Path) -> None:
         schema = load_schema(sample_schema_path)
         data = [
             {
@@ -28,7 +28,7 @@ class TestValidation:
         assert records[0].lemma == "hello"
         assert records[0].pos == "noun"
 
-    def test_validate_with_optional_fields(self, sample_schema_path: Path):
+    def test_validate_with_optional_fields(self, sample_schema_path: Path) -> None:
         schema = load_schema(sample_schema_path)
         data = [
             {
@@ -42,7 +42,7 @@ class TestValidation:
         records = validate(data, schema)
         assert records[0].definition_pt == "uma saudação"
 
-    def test_validate_with_default_values(self, sample_schema_path: Path):
+    def test_validate_with_default_values(self, sample_schema_path: Path) -> None:
         schema = load_schema(sample_schema_path)
         data = [
             {
@@ -56,7 +56,7 @@ class TestValidation:
         # frequency has default of 0
         assert records[0].frequency == 0
 
-    def test_validate_missing_required_field(self, sample_schema_path: Path):
+    def test_validate_missing_required_field(self, sample_schema_path: Path) -> None:
         schema = load_schema(sample_schema_path)
         data = [
             {
@@ -70,7 +70,7 @@ class TestValidation:
             validate(data, schema)
         assert "lemma" in str(exc_info.value)
 
-    def test_validate_invalid_enum_value(self, sample_schema_path: Path):
+    def test_validate_invalid_enum_value(self, sample_schema_path: Path) -> None:
         schema = load_schema(sample_schema_path)
         data = [
             {
@@ -84,7 +84,7 @@ class TestValidation:
             validate(data, schema)
         assert "pos" in str(exc_info.value)
 
-    def test_validate_collect_errors(self, sample_schema_path: Path):
+    def test_validate_collect_errors(self, sample_schema_path: Path) -> None:
         schema = load_schema(sample_schema_path)
         data = [
             {"id": "1"},  # Missing multiple required fields
@@ -95,7 +95,7 @@ class TestValidation:
         # Should have collected multiple errors
         assert len(exc_info.value.errors) > 1
 
-    def test_validate_list_field(self, sample_schema_path: Path):
+    def test_validate_list_field(self, sample_schema_path: Path) -> None:
         schema = load_schema(sample_schema_path)
         data = [
             {
@@ -113,7 +113,7 @@ class TestValidation:
 class TestDataclassGeneration:
     """Tests for dataclass generation from schemas."""
 
-    def test_generated_dataclass_is_frozen(self, sample_schema_path: Path):
+    def test_generated_dataclass_is_frozen(self, sample_schema_path: Path) -> None:
         schema = load_schema(sample_schema_path)
         data = [
             {
@@ -129,7 +129,7 @@ class TestDataclassGeneration:
         with pytest.raises(AttributeError):
             records[0].lemma = "changed"
 
-    def test_generated_dataclass_has_correct_fields(self, sample_schema_path: Path):
+    def test_generated_dataclass_has_correct_fields(self, sample_schema_path: Path) -> None:
         schema = load_schema(sample_schema_path)
         data = [
             {

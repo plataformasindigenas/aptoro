@@ -262,7 +262,7 @@ def load_schema(path: str | Path) -> Schema:
         raise SchemaError(f"Schema file not found: {path}")
 
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f)
     except yaml.YAMLError as e:
         raise SchemaError(f"Invalid YAML in schema file: {e}")

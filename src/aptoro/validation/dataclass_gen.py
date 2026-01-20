@@ -1,9 +1,10 @@
 """Dynamic dataclass generation from schemas."""
 
-from dataclasses import dataclass, field as dataclass_field, make_dataclass
+from dataclasses import field as dataclass_field
+from dataclasses import make_dataclass
 from typing import Any, get_type_hints
 
-from aptoro.schema.types import BaseType, Field, FieldType, NestedField, Schema
+from aptoro.schema.types import BaseType, Field, FieldType, Schema
 
 
 def _python_type_for_field_type(field_type: FieldType) -> type:
@@ -19,7 +20,7 @@ def _python_type_for_field_type(field_type: FieldType) -> type:
     if field_type.base == BaseType.LIST:
         if field_type.item_type:
             item_type = _python_type_for_field_type(field_type.item_type)
-            python_type = list[item_type]  # type: ignore
+            python_type: type = list[item_type]  # type: ignore
         else:
             python_type = list
     else:
@@ -44,17 +45,21 @@ def _make_field_spec(f: Field) -> tuple[str, type, Any]:
         default = f.default
         # Mutable defaults need field(default_factory=...)
         if isinstance(default, (list, dict)):
+
+            def factory(d=default):  # type: ignore
+                return d.copy()
+
             return (
                 f.name,
                 python_type,
-                dataclass_field(default_factory=lambda d=default: d.copy()),
+                dataclass_field(default_factory=factory),
             )
         return (f.name, python_type, default)
     elif f.is_optional:
         return (f.name, python_type, None)
     else:
         # Required field - no default
-        return (f.name, python_type)
+        return (f.name, python_type, dataclass_field())
 
 
 def generate_dataclass(schema: Schema) -> type:
