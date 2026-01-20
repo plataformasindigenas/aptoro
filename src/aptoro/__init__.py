@@ -26,8 +26,6 @@ from aptoro.readers import read
 from aptoro.schema import Schema, load_schema
 from aptoro.validation import validate
 
-__version__ = "0.1.0"
-
 __all__ = [
     # Main functions
     "load",
@@ -44,8 +42,6 @@ __all__ = [
     "SourceError",
     "AptoroError",
     "ValidationError",
-    # Version
-    "__version__",
 ]
 
 

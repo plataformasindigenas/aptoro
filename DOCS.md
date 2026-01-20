@@ -660,7 +660,7 @@ This accommodates CSV data where everything starts as strings.
 
 ## License
 
-MIT
+GPLv3
 
 ---
 
