@@ -25,6 +25,13 @@ entries = validate(data, schema)
 
 # Export
 json_str = to_json(entries)
+
+# Export with embedded metadata (for self-contained files)
+json_meta = to_json(entries, schema=schema, include_meta=True)
+
+# Load back with metadata
+from aptoro import load_meta
+loaded_schema, loaded_data = load_meta("output.json")
 ```
 
 ## Schema Language

@@ -30,6 +30,9 @@ Aptoro is a minimal, functional Python ETL library for reading, validating, and 
    - [Error Collection](#error-collection)
    - [Error Messages](#error-messages)
 7. [Output](#output)
+   - [To JSON](#to-json)
+   - [To Dictionaries](#to-dictionaries)
+   - [Embedded Metadata](#embedded-metadata)
 8. [API Reference](#api-reference)
 9. [Error Types](#error-types)
 10. [Examples](#examples)
@@ -399,6 +402,49 @@ dict_list = to_dicts(records)
 # [{'id': '1', 'name': 'Alice', ...}, ...]
 ```
 
+### Embedded Metadata
+
+You can include the schema metadata in the output file, making it self-describing and portable. This is useful for downstream tools that need to know the schema (types, optionality, etc.).
+
+```python
+# Export with metadata
+json_with_meta = to_json(records, schema=schema, include_meta=True)
+```
+
+The output structure will be:
+
+```json
+{
+  "meta": {
+    "schema_name": "person",
+    "version": "1.0",
+    "primary_key": "id",
+    "generated_at": "2023-10-27T10:00:00Z",
+    "fields": {
+      "id": "str",
+      "name": "str",
+      "age": "int"
+    }
+  },
+  "data": [
+    {"id": "1", "name": "Alice", "age": 30},
+    ...
+  ]
+}
+```
+
+To load this back:
+
+```python
+from aptoro import load_meta
+
+# Returns the reconstructed Schema object and the raw data list
+schema, data = load_meta("output_with_meta.json")
+
+# You can then validate as usual
+records = validate(data, schema)
+```
+
 ---
 
 ## API Reference
@@ -422,6 +468,16 @@ records = load("data.csv", schema_object)  # Can pass Schema directly
 - `**kwargs`: Passed to reader
 
 **Returns:** List of dataclass instances
+
+#### `load_meta(source)`
+
+Load a JSON file with embedded metadata (exported with `include_meta=True`).
+
+```python
+schema, data = load_meta("output.json")
+```
+
+**Returns:** Tuple of `(Schema, list[dict])`
 
 #### `load_schema(path)`
 
@@ -453,13 +509,17 @@ records = validate(data, schema)
 
 **Returns:** List of dataclass instances
 
-#### `to_json(records, *, indent=2, ensure_ascii=False)`
+#### `to_json(records, *, schema=None, include_meta=False, indent=2, ensure_ascii=False)`
 
 Convert records to JSON string.
 
-#### `to_dicts(records)`
+If `include_meta=True`, `schema` must be provided. Returns a JSON object with `meta` and `data` keys.
 
-Convert records to list of dictionaries.
+#### `to_dicts(records, *, schema=None, include_meta=False)`
+
+Convert records to list of dictionaries (or dict with metadata).
+
+If `include_meta=True`, `schema` must be provided. Returns `{'meta': ..., 'data': [...]}`.
 
 ### Schema Object
 
