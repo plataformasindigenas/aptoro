@@ -14,13 +14,18 @@ Example:
     >>> data = read("data.csv")
     >>> entries = validate(data, schema)
     >>>
-    >>> # Export
-    >>> json_str = to_json(entries)
+    >>> # Export with embedded metadata (for downstream tools like kodudo)
+    >>> json_str = to_json(entries, schema=schema, include_meta=True)
+    >>>
+    >>> # Load back JSON with metadata
+    >>> schema, data = load_meta("output.json")
+    >>> records = validate(data, schema)
 """
 
 from typing import Any
 
 from aptoro.errors import AptoroError, SchemaError, SourceError, ValidationError
+from aptoro.meta import load_meta
 from aptoro.output import to_dicts, to_json
 from aptoro.readers import read
 from aptoro.schema import Schema, load_schema
@@ -29,6 +34,7 @@ from aptoro.validation import validate
 __all__ = [
     # Main functions
     "load",
+    "load_meta",
     "load_schema",
     "read",
     "validate",

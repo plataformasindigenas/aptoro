@@ -141,3 +141,34 @@ class Schema:
     def field_names(self) -> tuple[str, ...]:
         """Get all field names."""
         return tuple(f.name for f in self.fields)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize schema to a dictionary suitable for JSON export.
+
+        Returns:
+            Dictionary with schema metadata and field definitions.
+        """
+
+        def _field_to_value(f: "Field | NestedField") -> str | dict[str, Any]:
+            if isinstance(f, Field):
+                return str(f.field_type)
+            # NestedField
+            return {
+                "type": "list" if f.is_list else "dict",
+                "optional": f.optional,
+                "items": {nf.name: _field_to_value(nf) for nf in f.fields},
+            }
+
+        result: dict[str, Any] = {
+            "schema_name": self.name,
+            "fields": {f.name: _field_to_value(f) for f in self.fields},
+        }
+
+        if self.description:
+            result["description"] = self.description
+        if self.version:
+            result["version"] = self.version
+        if self.primary_key != "id":
+            result["primary_key"] = self.primary_key
+
+        return result
