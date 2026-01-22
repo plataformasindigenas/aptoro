@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-01-23
+
+### Added
+- New `datetime` datatype with strict ISO 8601 validation and UTC normalization.
+- Support for `datetime` fields in schemas (e.g., `created: datetime`).
+- Automatic conversion of date-only strings to UTC datetimes.
+- Support for optional (`?`) and default values (`= value`) for all types, including `url`, `file`, and `datetime`.
+
+### Changed
+- Improved schema parsing to consistently handle optional/default modifiers for all base types.
+- Updated documentation with new type features and badges.
+- `url` and `file` types now correctly respect optional flags.
+
 ## [0.2.0] - 2026-01-21
 
 ### Added
