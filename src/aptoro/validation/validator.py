@@ -76,28 +76,22 @@ def _pydantic_type_for_field_type(field_type: FieldType) -> type:
     }
 
     if field_type.base == BaseType.URL:
-        return Annotated[str, AfterValidator(validate_url)]  # type: ignore
-
-    if field_type.base == BaseType.FILE:
-        return Annotated[str, AfterValidator(validate_file)]  # type: ignore
-
-    if field_type.base == BaseType.DATETIME:
-        return Annotated[str, AfterValidator(validate_datetime)]  # type: ignore
-
-    # Handle constrained strings (enums)
-    if field_type.base == BaseType.STR and field_type.constraints:
+        python_type = Annotated[str, AfterValidator(validate_url)]  # type: ignore
+    elif field_type.base == BaseType.FILE:
+        python_type = Annotated[str, AfterValidator(validate_file)]  # type: ignore
+    elif field_type.base == BaseType.DATETIME:
+        python_type = Annotated[str, AfterValidator(validate_datetime)]  # type: ignore
+    elif field_type.base == BaseType.STR and field_type.constraints:
         # Create Literal type for enum values
-        return Literal[field_type.constraints]  # type: ignore
-
-    # Handle int/float with range constraints - just return the base type
-    # Range constraints are handled in _create_pydantic_model via Field()
-    if field_type.base == BaseType.INT or field_type.base == BaseType.FLOAT:
-        return base_map[field_type.base]
-
-    if field_type.base == BaseType.LIST:
+        python_type = Literal[field_type.constraints]  # type: ignore
+    elif field_type.base == BaseType.INT or field_type.base == BaseType.FLOAT:
+        # Handle int/float with range constraints - just return the base type
+        # Range constraints are handled in _create_pydantic_model via Field()
+        python_type = base_map[field_type.base]
+    elif field_type.base == BaseType.LIST:
         if field_type.item_type:
             item_type = _pydantic_type_for_field_type(field_type.item_type)
-            python_type: type = list[item_type]  # type: ignore
+            python_type = list[item_type]  # type: ignore
         else:
             python_type = list
     else:
@@ -131,9 +125,10 @@ def _create_pydantic_model(schema: Schema) -> type[BaseModel]:
                     field_info_kwargs["le"] = f.field_type.max_value
                 if f.has_default:
                     field_info_kwargs["default"] = f.default
+                    field_info_kwargs["validate_default"] = True
                 field_info = PydanticField(**field_info_kwargs)  # type: ignore
             elif f.has_default:
-                field_info = FieldInfo(default=f.default)
+                field_info = FieldInfo(default=f.default, validate_default=True)
             elif f.is_optional:
                 field_info = FieldInfo(default=None)
             else:

@@ -33,6 +33,16 @@ class TestParseTypeString:
         ft = parse_type_string("bool")
         assert ft.base == BaseType.BOOL
 
+    def test_special_types(self) -> None:
+        for t, base in [
+            ("url", BaseType.URL),
+            ("file", BaseType.FILE),
+            ("datetime", BaseType.DATETIME),
+        ]:
+            ft = parse_type_string(t)
+            assert ft.base == base
+            assert not ft.optional
+
     def test_optional_str(self) -> None:
         ft = parse_type_string("str?")
         assert ft.base == BaseType.STR
@@ -42,6 +52,16 @@ class TestParseTypeString:
         ft = parse_type_string("int?")
         assert ft.base == BaseType.INT
         assert ft.optional
+
+    def test_optional_special_types(self) -> None:
+        for t, base in [
+            ("url?", BaseType.URL),
+            ("file?", BaseType.FILE),
+            ("datetime?", BaseType.DATETIME),
+        ]:
+            ft = parse_type_string(t)
+            assert ft.base == base
+            assert ft.optional
 
     def test_str_with_default(self) -> None:
         ft = parse_type_string('str = "hello"')
@@ -66,6 +86,22 @@ class TestParseTypeString:
         assert ft.base == BaseType.BOOL
         assert ft.has_default
         assert ft.default is False
+
+    def test_special_types_with_default(self) -> None:
+        ft = parse_type_string('url = "https://example.com"')
+        assert ft.base == BaseType.URL
+        assert ft.has_default
+        assert ft.default == "https://example.com"
+
+        ft = parse_type_string('file = "path/to/file"')
+        assert ft.base == BaseType.FILE
+        assert ft.has_default
+        assert ft.default == "path/to/file"
+
+        ft = parse_type_string('datetime = "2023-01-01"')
+        assert ft.base == BaseType.DATETIME
+        assert ft.has_default
+        assert ft.default == "2023-01-01"
 
     def test_str_with_constraints(self) -> None:
         ft = parse_type_string("str[noun|verb|adj]")

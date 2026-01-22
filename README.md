@@ -56,8 +56,8 @@ fields:
 
 - Basic types: `str`, `int`, `float`, `bool`
 - Specialized types: `url`, `file`, `datetime`
-- Optional: `str?`
-- Default value: `str = "default"`, `int = 0`
+- Optional: `str?`, `int?`, `url?`, `datetime?`
+- Default value: `str = "default"`, `int = 0`, `datetime = "2024-01-01"`
 - Constrained: `str[a|b|c]`
 - Lists: `list[str]`, `list[int]`
 

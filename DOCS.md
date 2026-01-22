@@ -148,6 +148,8 @@ fields:
   name: str           # Required
   nickname: str?      # Optional (can be null/missing)
   age: int?           # Optional integer
+  website: url?       # Optional URL
+  created: datetime?  # Optional datetime
 ```
 
 Optional fields default to `None` when not provided.
@@ -162,6 +164,8 @@ fields:
   count: int = 0
   enabled: bool = true
   tags: list[str] = []
+  homepage: url = "https://example.com"
+  start_date: datetime = "2024-01-01"
 ```
 
 **Supported default values:**
@@ -172,6 +176,8 @@ fields:
 - Empty list: `[]`
 - Empty dict: `{}`
 - Null: `null` or `none`
+
+**Note:** Default values are validated against the type. For example, a default for a `datetime` field must be a valid ISO 8601 string, and it will be normalized to UTC in the output.
 
 ### Constrained Values (Enums)
 
