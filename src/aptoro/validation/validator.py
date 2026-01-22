@@ -2,6 +2,7 @@
 
 import urllib.error
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -34,6 +35,34 @@ def validate_file(value: str) -> str:
     return value
 
 
+def validate_datetime(value: str) -> str:
+    """Validate that a string is a valid ISO 8601 datetime/date.
+
+    Ensures the result is UTC.
+    """
+    try:
+        # Try full datetime first
+        dt = datetime.fromisoformat(value)
+    except ValueError:
+        # Check if it's just a date
+        try:
+            d = datetime.strptime(value, "%Y-%m-%d").date()
+            dt = datetime.combine(d, datetime.min.time())
+        except ValueError as e:
+            raise ValueError(
+                f"Invalid datetime format: {value}. Expected ISO 8601 (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS)"
+            ) from e
+
+    # Ensure timezone awareness (UTC)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    else:
+        dt = dt.astimezone(timezone.utc)
+
+    # Return normalized ISO format
+    return dt.isoformat()
+
+
 def _pydantic_type_for_field_type(field_type: FieldType) -> type:
     """Convert FieldType to Pydantic-compatible type."""
     from typing import Literal
@@ -51,6 +80,9 @@ def _pydantic_type_for_field_type(field_type: FieldType) -> type:
 
     if field_type.base == BaseType.FILE:
         return Annotated[str, AfterValidator(validate_file)]  # type: ignore
+
+    if field_type.base == BaseType.DATETIME:
+        return Annotated[str, AfterValidator(validate_datetime)]  # type: ignore
 
     # Handle constrained strings (enums)
     if field_type.base == BaseType.STR and field_type.constraints:

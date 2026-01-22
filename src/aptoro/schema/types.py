@@ -19,6 +19,7 @@ class BaseType(Enum):
     DICT = "dict"
     URL = "url"
     FILE = "file"
+    DATETIME = "datetime"
 
 
 @dataclass(frozen=True)

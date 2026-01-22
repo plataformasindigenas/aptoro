@@ -55,6 +55,7 @@ fields:
 ### Type Syntax
 
 - Basic types: `str`, `int`, `float`, `bool`
+- Specialized types: `url`, `file`, `datetime`
 - Optional: `str?`
 - Default value: `str = "default"`, `int = 0`
 - Constrained: `str[a|b|c]`

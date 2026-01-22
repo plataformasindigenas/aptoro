@@ -135,6 +135,7 @@ fields:
 | `bool` | `bool` | True/False |
 | `url` | `str` | URL (validated for accessibility, 10s timeout) |
 | `file` | `str` | File path (validated for existence) |
+| `datetime` | `str` | ISO 8601 datetime (normalized to UTC) |
 
 **Smart default**: All fields are **required** unless marked otherwise.
 
@@ -204,6 +205,17 @@ fields:
 - `float[-273.15..0]` - Supports negative numbers and decimals
 
 The range is inclusive: values equal to min or max are valid.
+
+### Datetime Handling
+
+The `datetime` type strictly follows ISO 8601 but is flexible with input:
+
+- **Date only**: `2023-10-27` → `2023-10-27T00:00:00+00:00` (Midnight UTC)
+- **Full datetime**: `2023-10-27T14:30:00Z`
+- **Offset conversion**: `2023-10-27T14:30:00+02:00` → `2023-10-27T12:30:00+00:00` (Converted to UTC)
+- **Naive datetime**: `2023-10-27T14:30:00` → `2023-10-27T14:30:00+00:00` (Assumed UTC)
+
+The output is always a normalized ISO 8601 string with UTC timezone (`+00:00` or `Z`).
 
 ### Lists
 
