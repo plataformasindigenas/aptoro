@@ -23,7 +23,7 @@ from aptoro.schema.types import BaseType, Field, FieldType, NestedField, Schema
 TYPE_PATTERN = re.compile(
     r"""
     ^
-    (?P<base>str|int|float|bool|list|dict)  # Base type
+    (?P<base>str|int|float|bool|list|dict|url|file)  # Base type
     (?:\[(?P<inner>[^\]]+)\])?              # Optional inner type or constraints
     (?P<optional>\?)?                        # Optional marker
     (?:\s*=\s*(?P<default>.+))?             # Optional default value

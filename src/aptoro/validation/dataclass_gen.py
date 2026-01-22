@@ -15,6 +15,8 @@ def _python_type_for_field_type(field_type: FieldType) -> type:
         BaseType.FLOAT: float,
         BaseType.BOOL: bool,
         BaseType.DICT: dict,
+        BaseType.URL: str,
+        BaseType.FILE: str,
     }
 
     if field_type.base == BaseType.LIST:

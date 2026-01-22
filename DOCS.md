@@ -133,6 +133,8 @@ fields:
 | `int` | `int` | Integer |
 | `float` | `float` | Decimal number |
 | `bool` | `bool` | True/False |
+| `url` | `str` | URL (validated for accessibility, 10s timeout) |
+| `file` | `str` | File path (validated for existence) |
 
 **Smart default**: All fields are **required** unless marked otherwise.
 

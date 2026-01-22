@@ -1,14 +1,37 @@
 """Data validation against schemas using Pydantic."""
 
-from typing import Any
+from typing import Any, Annotated
+import urllib.request
+import urllib.error
+from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict, create_model
+from pydantic import BaseModel, ConfigDict, create_model, AfterValidator
 from pydantic import ValidationError as PydanticValidationError
 from pydantic.fields import FieldInfo
 
 from aptoro.errors import FieldError, ValidationError
 from aptoro.schema.types import BaseType, Field, FieldType, Schema
 from aptoro.validation.dataclass_gen import create_instance, generate_dataclass
+
+
+def validate_url(value: str) -> str:
+    """Validate that a URL is accessible."""
+    try:
+        req = urllib.request.Request(value, headers={"User-Agent": "Aptoro/0.2.0"})
+        with urllib.request.urlopen(req, timeout=10) as response:
+            if response.status >= 400:
+                raise ValueError(f"URL returned status {response.status}")
+    except (urllib.error.URLError, ValueError) as e:
+        raise ValueError(f"URL validation failed: {e}") from e
+    return value
+
+
+def validate_file(value: str) -> str:
+    """Validate that a file exists."""
+    path = Path(value)
+    if not path.is_file():
+        raise ValueError(f"File not found: {value}")
+    return value
 
 
 def _pydantic_type_for_field_type(field_type: FieldType) -> type:
@@ -22,6 +45,12 @@ def _pydantic_type_for_field_type(field_type: FieldType) -> type:
         BaseType.BOOL: bool,
         BaseType.DICT: dict,
     }
+
+    if field_type.base == BaseType.URL:
+        return Annotated[str, AfterValidator(validate_url)]  # type: ignore
+
+    if field_type.base == BaseType.FILE:
+        return Annotated[str, AfterValidator(validate_file)]  # type: ignore
 
     # Handle constrained strings (enums)
     if field_type.base == BaseType.STR and field_type.constraints:

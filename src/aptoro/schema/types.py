@@ -17,6 +17,8 @@ class BaseType(Enum):
     BOOL = "bool"
     LIST = "list"
     DICT = "dict"
+    URL = "url"
+    FILE = "file"
 
 
 @dataclass(frozen=True)
