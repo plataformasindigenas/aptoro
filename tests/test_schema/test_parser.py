@@ -105,6 +105,81 @@ class TestParseTypeString:
         ft = parse_type_string("  str  ")
         assert ft.base == BaseType.STR
 
+    def test_int_with_range_min_max(self) -> None:
+        ft = parse_type_string("int[1..10]")
+        assert ft.base == BaseType.INT
+        assert ft.min_value == 1
+        assert ft.max_value == 10
+
+    def test_int_with_range_only_min(self) -> None:
+        ft = parse_type_string("int[0..]")
+        assert ft.base == BaseType.INT
+        assert ft.min_value == 0
+        assert ft.max_value is None
+
+    def test_int_with_range_only_max(self) -> None:
+        ft = parse_type_string("int[..100]")
+        assert ft.base == BaseType.INT
+        assert ft.min_value is None
+        assert ft.max_value == 100
+
+    def test_int_with_range_negative(self) -> None:
+        ft = parse_type_string("int[-10..10]")
+        assert ft.base == BaseType.INT
+        assert ft.min_value == -10
+        assert ft.max_value == 10
+
+    def test_float_with_range_min_max(self) -> None:
+        ft = parse_type_string("float[0.0..1.0]")
+        assert ft.base == BaseType.FLOAT
+        assert ft.min_value == 0.0
+        assert ft.max_value == 1.0
+
+    def test_float_with_range_only_min(self) -> None:
+        ft = parse_type_string("float[0.5..]")
+        assert ft.base == BaseType.FLOAT
+        assert ft.min_value == 0.5
+        assert ft.max_value is None
+
+    def test_float_with_range_only_max(self) -> None:
+        ft = parse_type_string("float[..3.14]")
+        assert ft.base == BaseType.FLOAT
+        assert ft.min_value is None
+        assert ft.max_value == 3.14
+
+    def test_float_with_range_negative(self) -> None:
+        ft = parse_type_string("float[-273.15..0]")
+        assert ft.base == BaseType.FLOAT
+        assert ft.min_value == -273.15
+        assert ft.max_value == 0
+
+    def test_int_with_range_optional(self) -> None:
+        ft = parse_type_string("int[1..10]?")
+        assert ft.base == BaseType.INT
+        assert ft.optional
+        assert ft.min_value == 1
+        assert ft.max_value == 10
+
+    def test_int_with_range_and_default(self) -> None:
+        ft = parse_type_string("int[1..10] = 5")
+        assert ft.base == BaseType.INT
+        assert ft.has_default
+        assert ft.default == 5
+        assert ft.min_value == 1
+        assert ft.max_value == 10
+
+    def test_invalid_range_no_dots(self) -> None:
+        with pytest.raises(SchemaError, match="Invalid range specification"):
+            parse_type_string("int[1-10]")
+
+    def test_invalid_range_mixed_syntax(self) -> None:
+        with pytest.raises(SchemaError, match="Invalid range specification"):
+            parse_type_string("int[1|10]")
+
+    def test_range_not_supported_for_str(self) -> None:
+        with pytest.raises(SchemaError, match="Invalid constraint specification"):
+            parse_type_string("str[1..10]")
+
 
 class TestLoadSchema:
     """Tests for load_schema function."""

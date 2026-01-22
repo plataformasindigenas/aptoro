@@ -33,6 +33,7 @@ TYPE_PATTERN = re.compile(
 )
 
 CONSTRAINT_PATTERN = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*(?:\|[a-zA-Z_][a-zA-Z0-9_]*)*$")
+RANGE_PATTERN = re.compile(r"^(?P<min>-?\d+\.?\d*)?\.\.(?P<max>-?\d+\.?\d*)?$")
 
 
 def parse_type_string(type_str: str) -> FieldType:
@@ -65,6 +66,8 @@ def parse_type_string(type_str: str) -> FieldType:
 
     constraints: tuple[str, ...] | None = None
     item_type: FieldType | None = None
+    min_value: int | float | None = None
+    max_value: int | float | None = None
 
     if inner:
         if base == BaseType.LIST:
@@ -78,6 +81,29 @@ def parse_type_string(type_str: str) -> FieldType:
                 raise SchemaError(
                     f"Invalid constraint specification: {inner!r}. "
                     "Constraints must be pipe-separated identifiers."
+                )
+        elif base in (BaseType.INT, BaseType.FLOAT):
+            # int[1..10] or float[0.5..2.5] - range constraints
+            range_match = RANGE_PATTERN.match(inner)
+            if range_match:
+                min_str = range_match.group("min")
+                max_str = range_match.group("max")
+
+                if min_str is not None:
+                    if base == BaseType.INT:
+                        min_value = int(min_str)
+                    else:
+                        min_value = float(min_str)
+
+                if max_str is not None:
+                    if base == BaseType.INT:
+                        max_value = int(max_str)
+                    else:
+                        max_value = float(max_str)
+            else:
+                raise SchemaError(
+                    f"Invalid range specification: {inner!r}. "
+                    "Range must be in the format '[min..max]' where min and/or max can be omitted."
                 )
         else:
             raise SchemaError(f"Type {base_str} does not support inner type/constraints")
@@ -96,6 +122,8 @@ def parse_type_string(type_str: str) -> FieldType:
         item_type=item_type,
         default=default,
         has_default=has_default,
+        min_value=min_value,
+        max_value=max_value,
     )
 
 

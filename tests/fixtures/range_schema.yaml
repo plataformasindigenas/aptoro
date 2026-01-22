@@ -1,0 +1,9 @@
+name: range_test
+description: Schema for testing range constraints
+
+fields:
+  id: str
+  count: int[1..10]
+  score: float[0.0..1.0]
+  value: int[0..] = 0
+  limit: int[..100] = 0

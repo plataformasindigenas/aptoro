@@ -16,6 +16,7 @@ Aptoro is a minimal, functional Python ETL library for reading, validating, and 
    - [Optional Fields](#optional-fields)
    - [Default Values](#default-values)
    - [Constrained Values](#constrained-values-enums)
+   - [Numeric Range Constraints](#numeric-range-constraints)
    - [Lists](#lists)
    - [Schema Metadata](#schema-metadata)
    - [Schema Inheritance](#schema-inheritance)
@@ -181,6 +182,26 @@ fields:
 ```
 
 Validation will fail if the data contains any value not in the list.
+
+### Numeric Range Constraints
+
+Restrict int/float fields to a range of values using `[min..max]`:
+
+```yaml
+fields:
+  age: int[0..120]           # Integer between 0 and 120
+  score: float[0.0..1.0]     # Float between 0.0 and 1.0
+  quantity: int[1..]         # Integer >= 1 (no upper limit)
+  temperature: float[..100]  # Float <= 100 (no lower limit)
+```
+
+**Range syntax:**
+- `int[1..10]` - Value must be >= 1 and <= 10
+- `int[..10]` - Value must be <= 10
+- `int[5..]` - Value must be >= 5
+- `float[-273.15..0]` - Supports negative numbers and decimals
+
+The range is inclusive: values equal to min or max are valid.
 
 ### Lists
 

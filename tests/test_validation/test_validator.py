@@ -149,3 +149,89 @@ class TestDataclassGeneration:
         assert hasattr(records[0], "definition_pt")
         assert hasattr(records[0], "examples")
         assert hasattr(records[0], "frequency")
+
+
+class TestRangeConstraints:
+    """Tests for int/float range constraints validation."""
+
+    def test_validate_int_within_range(self) -> None:
+        from aptoro.schema import load_schema
+        from aptoro.validation import validate
+
+        schema = load_schema("tests/fixtures/range_schema.yaml")
+        data = [
+            {"id": "1", "count": 5, "score": 0.5},
+        ]
+        records = validate(data, schema)
+        assert records[0].count == 5
+        assert records[0].score == 0.5
+
+    def test_validate_int_below_min(self) -> None:
+        from aptoro.schema import load_schema
+        from aptoro.validation import validate
+
+        schema = load_schema("tests/fixtures/range_schema.yaml")
+        data = [
+            {"id": "1", "count": 0, "score": 0.5},  # count < 1
+        ]
+        with pytest.raises(ValidationError) as exc_info:
+            validate(data, schema)
+        assert "count" in str(exc_info.value)
+
+    def test_validate_int_above_max(self) -> None:
+        from aptoro.schema import load_schema
+        from aptoro.validation import validate
+
+        schema = load_schema("tests/fixtures/range_schema.yaml")
+        data = [
+            {"id": "1", "count": 11, "score": 0.5},  # count > 10
+        ]
+        with pytest.raises(ValidationError) as exc_info:
+            validate(data, schema)
+        assert "count" in str(exc_info.value)
+
+    def test_validate_float_below_min(self) -> None:
+        from aptoro.schema import load_schema
+        from aptoro.validation import validate
+
+        schema = load_schema("tests/fixtures/range_schema.yaml")
+        data = [
+            {"id": "1", "count": 5, "score": -0.1},  # score < 0.0
+        ]
+        with pytest.raises(ValidationError) as exc_info:
+            validate(data, schema)
+        assert "score" in str(exc_info.value)
+
+    def test_validate_float_above_max(self) -> None:
+        from aptoro.schema import load_schema
+        from aptoro.validation import validate
+
+        schema = load_schema("tests/fixtures/range_schema.yaml")
+        data = [
+            {"id": "1", "count": 5, "score": 1.5},  # score > 1.0
+        ]
+        with pytest.raises(ValidationError) as exc_info:
+            validate(data, schema)
+        assert "score" in str(exc_info.value)
+
+    def test_validate_int_only_min_constraint(self) -> None:
+        from aptoro.schema import load_schema
+        from aptoro.validation import validate
+
+        schema = load_schema("tests/fixtures/range_schema.yaml")
+        data = [
+            {"id": "1", "count": 5, "score": 0.5, "value": 100},  # value >= 0
+        ]
+        records = validate(data, schema)
+        assert records[0].value == 100
+
+    def test_validate_int_only_max_constraint(self) -> None:
+        from aptoro.schema import load_schema
+        from aptoro.validation import validate
+
+        schema = load_schema("tests/fixtures/range_schema.yaml")
+        data = [
+            {"id": "1", "count": 5, "score": 0.5, "limit": 50},  # limit <= 100
+        ]
+        records = validate(data, schema)
+        assert records[0].limit == 50

@@ -28,6 +28,11 @@ def _pydantic_type_for_field_type(field_type: FieldType) -> type:
         # Create Literal type for enum values
         return Literal[field_type.constraints]  # type: ignore
 
+    # Handle int/float with range constraints - just return the base type
+    # Range constraints are handled in _create_pydantic_model via Field()
+    if field_type.base == BaseType.INT or field_type.base == BaseType.FLOAT:
+        return base_map[field_type.base]  # type: ignore
+
     if field_type.base == BaseType.LIST:
         if field_type.item_type:
             item_type = _pydantic_type_for_field_type(field_type.item_type)
@@ -46,13 +51,27 @@ def _pydantic_type_for_field_type(field_type: FieldType) -> type:
 
 def _create_pydantic_model(schema: Schema) -> type[BaseModel]:
     """Create a Pydantic model from a schema for validation."""
+    from pydantic import Field as PydanticField
+
     field_definitions: dict[str, tuple[type, FieldInfo]] = {}
 
     for f in schema.fields:
         if isinstance(f, Field):
             python_type = _pydantic_type_for_field_type(f.field_type)
 
-            if f.has_default:
+            # Handle range constraints for int/float
+            if (f.field_type.base == BaseType.INT or f.field_type.base == BaseType.FLOAT) and (
+                f.field_type.min_value is not None or f.field_type.max_value is not None
+            ):
+                field_info_kwargs: dict[str, int | float] = {}
+                if f.field_type.min_value is not None:
+                    field_info_kwargs["ge"] = f.field_type.min_value
+                if f.field_type.max_value is not None:
+                    field_info_kwargs["le"] = f.field_type.max_value
+                if f.has_default:
+                    field_info_kwargs["default"] = f.default
+                field_info = PydanticField(**field_info_kwargs)  # type: ignore
+            elif f.has_default:
                 field_info = FieldInfo(default=f.default)
             elif f.is_optional:
                 field_info = FieldInfo(default=None)

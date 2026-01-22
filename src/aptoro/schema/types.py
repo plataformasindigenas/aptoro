@@ -26,7 +26,8 @@ class FieldType:
     Examples:
         str -> FieldType(base=STR)
         str? -> FieldType(base=STR, optional=True)
-        str[a|b|c] -> FieldType(base=STR, constraints=['a', 'b', 'c'])
+        str[a|b|c] -> FieldType(base=STR, constraints=('a', 'b', 'c'))
+        int[1..10] -> FieldType(base=INT, min_value=1, max_value=10)
         list[str] -> FieldType(base=LIST, item_type=FieldType(base=STR))
     """
 
@@ -36,11 +37,17 @@ class FieldType:
     item_type: "FieldType | None" = None  # For list[T]
     default: Any = None
     has_default: bool = False
+    min_value: int | float | None = None  # For int/float range constraints
+    max_value: int | float | None = None  # For int/float range constraints
 
     def __str__(self) -> str:
         result = self.base.value
         if self.item_type:
             result = f"{result}[{self.item_type}]"
+        elif self.min_value is not None or self.max_value is not None:
+            min_str = str(self.min_value) if self.min_value is not None else ""
+            max_str = str(self.max_value) if self.max_value is not None else ""
+            result = f"{result}[{min_str}..{max_str}]"
         elif self.constraints:
             result = f"{result}[{'|'.join(self.constraints)}]"
         if self.optional:
