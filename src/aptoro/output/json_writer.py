@@ -2,7 +2,7 @@
 
 import json
 from dataclasses import asdict, is_dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from aptoro.schema.types import Schema
@@ -70,8 +70,12 @@ def to_dicts(
     if not include_meta:
         return result
 
-    meta = schema.to_dict()
-    meta["generated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    if schema:
+        meta = schema.to_dict()
+        meta["generated_at"] = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+    else:
+        # Should be unreachable due to check above, but satisfies type checker
+        meta = {}
 
     return {
         "meta": meta,

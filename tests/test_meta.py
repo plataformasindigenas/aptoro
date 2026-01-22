@@ -7,8 +7,8 @@ import pytest
 
 from aptoro import load_meta
 from aptoro.errors import SourceError
-from aptoro.schema import Schema, load_schema
 from aptoro.output import to_json
+from aptoro.schema import Schema, load_schema
 
 
 def test_load_meta_success(tmp_path: Path, sample_schema_path: Path) -> None:

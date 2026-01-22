@@ -1,11 +1,11 @@
 """Data validation against schemas using Pydantic."""
 
-from typing import Any, Annotated
-import urllib.request
 import urllib.error
+import urllib.request
 from pathlib import Path
+from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, create_model, AfterValidator
+from pydantic import AfterValidator, BaseModel, ConfigDict, create_model
 from pydantic import ValidationError as PydanticValidationError
 from pydantic.fields import FieldInfo
 
@@ -60,7 +60,7 @@ def _pydantic_type_for_field_type(field_type: FieldType) -> type:
     # Handle int/float with range constraints - just return the base type
     # Range constraints are handled in _create_pydantic_model via Field()
     if field_type.base == BaseType.INT or field_type.base == BaseType.FLOAT:
-        return base_map[field_type.base]  # type: ignore
+        return base_map[field_type.base]
 
     if field_type.base == BaseType.LIST:
         if field_type.item_type:

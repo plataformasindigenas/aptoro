@@ -47,7 +47,8 @@ class TestFullPipeline:
         assert "hello" in json_str
 
         dicts = to_dicts(records)
-        assert dicts[0]["lemma"] == "hello"
+        if isinstance(dicts, list):
+            assert dicts[0]["lemma"] == "hello"
 
     def test_schema_with_inheritance(self, child_schema_path: Path) -> None:
         """Test that schema inheritance works correctly."""

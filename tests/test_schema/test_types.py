@@ -1,7 +1,7 @@
 """Tests for Schema types and methods."""
 
-from aptoro.schema.types import Field, Schema, BaseType
 from aptoro.schema.parser import parse_type_string
+from aptoro.schema.types import Field, Schema
 
 
 def test_schema_to_dict_basic() -> None:
@@ -49,7 +49,8 @@ def test_schema_to_dict_nested() -> None:
     # Let's check Schema.to_dict implementation again. It checks isinstance(f, Field).
     # If it's NestedField, it recurses.
 
-    # We can't easily construct NestedField from parse_type_string directly if it doesn't support complex syntax,
+    # We can't easily construct NestedField from parse_type_string directly
+    # if it doesn't support complex syntax,
     # but we can import it.
     from aptoro.schema.types import NestedField
 

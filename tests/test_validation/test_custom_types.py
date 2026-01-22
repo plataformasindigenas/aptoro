@@ -1,10 +1,11 @@
 """Tests for custom types (url, file)."""
 
+import urllib.error
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-import urllib.error
 
 import pytest
+
 from aptoro.errors import ValidationError
 from aptoro.schema.types import BaseType, Field, FieldType, Schema
 from aptoro.validation import validate
@@ -21,7 +22,7 @@ def create_schema(field_name: str, base_type: BaseType) -> Schema:
 
 
 class TestUrlType:
-    def test_validate_valid_url(self):
+    def test_validate_valid_url(self) -> None:
         schema = create_schema("website", BaseType.URL)
         data = [{"id": "1", "website": "https://example.com"}]
 
@@ -33,7 +34,7 @@ class TestUrlType:
             records = validate(data, schema)
             assert records[0].website == "https://example.com"
 
-    def test_validate_invalid_url_404(self):
+    def test_validate_invalid_url_404(self) -> None:
         schema = create_schema("website", BaseType.URL)
         data = [{"id": "1", "website": "https://example.com/404"}]
 
@@ -46,7 +47,7 @@ class TestUrlType:
                 validate(data, schema)
             assert "URL returned status 404" in str(exc.value)
 
-    def test_validate_invalid_url_connection_error(self):
+    def test_validate_invalid_url_connection_error(self) -> None:
         schema = create_schema("website", BaseType.URL)
         data = [{"id": "1", "website": "https://invalid-domain.xyz"}]
 
@@ -59,7 +60,7 @@ class TestUrlType:
 
 
 class TestFileType:
-    def test_validate_valid_file(self, tmp_path):
+    def test_validate_valid_file(self, tmp_path: Path) -> None:
         # Create a real file for testing
         test_file = tmp_path / "test.txt"
         test_file.touch()
@@ -70,7 +71,7 @@ class TestFileType:
         records = validate(data, schema)
         assert records[0].path == str(test_file)
 
-    def test_validate_missing_file(self):
+    def test_validate_missing_file(self) -> None:
         schema = create_schema("path", BaseType.FILE)
         data = [{"id": "1", "path": "/non/existent/file.txt"}]
 
