@@ -44,6 +44,9 @@ dev = [
     "twine",
 ]
 
+[project.scripts]
+aptoro = "aptoro.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/plataformasindigenas/aptoro"
 Documentation = "https://github.com/plataformasindigenas/aptoro#readme"

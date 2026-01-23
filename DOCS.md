@@ -10,8 +10,9 @@ Aptoro is a minimal, functional Python ETL library for reading, validating, and 
 
 1. [Philosophy](#philosophy)
 2. [Installation](#installation)
-3. [Quick Start](#quick-start)
-4. [Schema Language](#schema-language)
+3. [CLI Usage](#cli-usage)
+4. [Quick Start](#quick-start)
+5. [Schema Language](#schema-language)
    - [Basic Types](#basic-types)
    - [Optional Fields](#optional-fields)
    - [Default Values](#default-values)
@@ -65,7 +66,43 @@ For development:
 pip install aptoro[dev]
 ```
 
-**Requirements**: Python 3.11+
+Requirements: Python 3.11+
+
+---
+
+## CLI Usage
+
+Aptoro includes a command-line interface (CLI) for quick validation tasks without writing Python code.
+
+### Validate Command
+
+The `validate` command checks a data file against a schema.
+
+```bash
+aptoro validate [source] --schema [schema_path]
+```
+
+**Arguments:**
+
+- `source`: Path or URL to the data file.
+- `--schema`, `-s`: Path to the YAML schema file (required).
+- `--format`, `-f`: Explicit data format (`csv`, `json`, `yaml`, `toml`). If not provided, it is auto-detected from the file extension.
+
+**Examples:**
+
+```bash
+# Validate a local CSV file
+aptoro validate ./data/records.csv --schema ./schemas/record.yaml
+
+# Validate a remote JSON file
+aptoro validate https://example.com/data.json --schema ./schemas/data.yaml
+
+# Validate a file with a non-standard extension
+aptoro validate ./data/dump.txt --schema ./schemas/dump.yaml --format json
+```
+
+If validation succeeds, it prints "Validation successful.".
+If validation fails, it prints the error details to standard error and exits with code 1.
 
 ---
 

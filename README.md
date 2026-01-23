@@ -23,6 +23,18 @@ It is a minimal, functional Python ETL library for reading, validating, and tran
 pip install aptoro
 ```
 
+## CLI Usage
+
+Aptoro provides a command-line interface for validating data files directly.
+
+```bash
+# Validate a CSV file against a schema
+aptoro validate data.csv --schema schema.yaml
+
+# Explicitly specify format
+aptoro validate data.txt --schema schema.yaml --format json
+```
+
 ## Quick Start
 
 ```python
