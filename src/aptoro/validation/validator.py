@@ -18,7 +18,7 @@ from aptoro.validation.dataclass_gen import create_instance, generate_dataclass
 def validate_url(value: str) -> str:
     """Validate that a URL is accessible."""
     try:
-        req = urllib.request.Request(value, headers={"User-Agent": "Aptoro/0.3.0"})
+        req = urllib.request.Request(value, headers={"User-Agent": "Aptoro/0.3.1"})
         with urllib.request.urlopen(req, timeout=10) as response:
             if response.status >= 400:
                 raise ValueError(f"URL returned status {response.status}")
