@@ -18,7 +18,7 @@ def validate_command(args: argparse.Namespace) -> None:
         )
         print("Validation successful.")
     except AptoroError as e:
-        print(f"{e}", file=sys.stderr)
+        print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
 
