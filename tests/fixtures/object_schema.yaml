@@ -1,0 +1,16 @@
+name: object_test
+description: Schema for testing object type
+fields:
+  id: str
+  infobox:
+    type: object
+    optional: true
+    fields:
+      nome_científico: str?
+      família: str?
+      habitat: str?
+  stats:
+    type: object
+    fields:
+      count: int
+      label: str = "default"

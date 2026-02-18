@@ -2,7 +2,7 @@
 
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -11,7 +11,7 @@ from pydantic import ValidationError as PydanticValidationError
 from pydantic.fields import FieldInfo
 
 from aptoro.errors import FieldError, ValidationError
-from aptoro.schema.types import BaseType, Field, FieldType, Schema
+from aptoro.schema.types import BaseType, Field, FieldType, NestedField, Schema
 from aptoro.validation.dataclass_gen import create_instance, generate_dataclass
 
 
@@ -50,14 +50,15 @@ def validate_datetime(value: str) -> str:
             dt = datetime.combine(d, datetime.min.time())
         except ValueError as e:
             raise ValueError(
-                f"Invalid datetime format: {value}. Expected ISO 8601 (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS)"
+                f"Invalid datetime format: {value}. "
+                "Expected ISO 8601 (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS)"
             ) from e
 
     # Ensure timezone awareness (UTC)
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
     else:
-        dt = dt.astimezone(timezone.utc)
+        dt = dt.astimezone(UTC)
 
     # Return normalized ISO format
     return dt.isoformat()
@@ -72,18 +73,26 @@ def _pydantic_type_for_field_type(field_type: FieldType) -> type:
         BaseType.INT: int,
         BaseType.FLOAT: float,
         BaseType.BOOL: bool,
-        BaseType.DICT: dict,
     }
 
-    if field_type.base == BaseType.URL:
-        python_type = Annotated[str, AfterValidator(validate_url)]  # type: ignore
+    python_type: type
+    if field_type.base == BaseType.DICT:
+        if field_type.value_type:
+            val_type = _pydantic_type_for_field_type(field_type.value_type)
+            python_type = dict[str, val_type]  # type: ignore[valid-type]
+        else:
+            python_type = dict
+    elif field_type.base == BaseType.OBJECT:
+        python_type = dict
+    elif field_type.base == BaseType.URL:
+        python_type = Annotated[str, AfterValidator(validate_url)]  # type: ignore[assignment]
     elif field_type.base == BaseType.FILE:
-        python_type = Annotated[str, AfterValidator(validate_file)]  # type: ignore
+        python_type = Annotated[str, AfterValidator(validate_file)]  # type: ignore[assignment]
     elif field_type.base == BaseType.DATETIME:
-        python_type = Annotated[str, AfterValidator(validate_datetime)]  # type: ignore
+        python_type = Annotated[str, AfterValidator(validate_datetime)]  # type: ignore[assignment]
     elif field_type.base == BaseType.STR and field_type.constraints:
         # Create Literal type for enum values
-        python_type = Literal[field_type.constraints]  # type: ignore
+        python_type = Literal[field_type.constraints]  # type: ignore[assignment]
     elif field_type.base == BaseType.INT or field_type.base == BaseType.FLOAT:
         # Handle int/float with range constraints - just return the base type
         # Range constraints are handled in _create_pydantic_model via Field()
@@ -91,7 +100,7 @@ def _pydantic_type_for_field_type(field_type: FieldType) -> type:
     elif field_type.base == BaseType.LIST:
         if field_type.item_type:
             item_type = _pydantic_type_for_field_type(field_type.item_type)
-            python_type = list[item_type]  # type: ignore
+            python_type = list[item_type]  # type: ignore[valid-type]
         else:
             python_type = list
     else:
@@ -99,9 +108,49 @@ def _pydantic_type_for_field_type(field_type: FieldType) -> type:
 
     # Wrap in Optional if field is optional
     if field_type.optional:
-        python_type = python_type | None  # type: ignore
+        python_type = python_type | None  # type: ignore[assignment]
 
     return python_type
+
+
+def _create_nested_pydantic_model(
+    nested: NestedField, parent_name: str = ""
+) -> type[BaseModel]:
+    """Create a Pydantic sub-model from a NestedField's fields."""
+    field_definitions: dict[str, tuple[type, FieldInfo]] = {}
+    model_name = "".join(word.capitalize() for word in nested.name.split("_")) + "SubModel"
+
+    for f in nested.fields:
+        if isinstance(f, Field):
+            python_type: type = _pydantic_type_for_field_type(f.field_type)
+
+            if f.has_default:
+                field_info = FieldInfo(default=f.default, validate_default=True)
+            elif f.is_optional:
+                field_info = FieldInfo(default=None)
+            else:
+                field_info = FieldInfo()
+
+            field_definitions[f.name] = (python_type, field_info)
+        elif isinstance(f, NestedField):
+            sub_model = _create_nested_pydantic_model(f, model_name)
+            nested_type: type
+            if f.is_list:
+                nested_type = list[sub_model]  # type: ignore[valid-type]
+            else:
+                nested_type = sub_model
+            if f.optional:
+                nested_type = nested_type | None  # type: ignore[assignment]
+                field_info = FieldInfo(default=None)
+            else:
+                field_info = FieldInfo()
+            field_definitions[f.name] = (nested_type, field_info)
+
+    return create_model(  # type: ignore[no-any-return, call-overload]
+        model_name,
+        __config__=ConfigDict(strict=False, extra="ignore", coerce_numbers_to_str=True),
+        **field_definitions,
+    )
 
 
 def _create_pydantic_model(schema: Schema) -> type[BaseModel]:
@@ -135,11 +184,24 @@ def _create_pydantic_model(schema: Schema) -> type[BaseModel]:
                 field_info = FieldInfo()
 
             field_definitions[f.name] = (python_type, field_info)
+        elif isinstance(f, NestedField):
+            sub_model = _create_nested_pydantic_model(f)
+            nested_type: type
+            if f.is_list:
+                nested_type = list[sub_model]  # type: ignore[valid-type]
+            else:
+                nested_type = sub_model
+            if f.optional:
+                nested_type = nested_type | None  # type: ignore[assignment]
+                field_info = FieldInfo(default=None)
+            else:
+                field_info = FieldInfo()
+            field_definitions[f.name] = (nested_type, field_info)
 
     # Create model class name
     model_name = "".join(word.capitalize() for word in schema.name.split("_")) + "Model"
 
-    return create_model(  # type: ignore
+    return create_model(  # type: ignore[no-any-return, call-overload]
         model_name,
         __config__=ConfigDict(strict=False, extra="ignore", coerce_numbers_to_str=True),
         **field_definitions,
@@ -174,6 +236,8 @@ def _convert_pydantic_error(
         expected = "bool"
     elif error_type == "list_type":
         expected = "list"
+    elif error_type == "dict_type":
+        expected = "dict"
     else:
         expected = msg
 

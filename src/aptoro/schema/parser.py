@@ -23,7 +23,7 @@ from aptoro.schema.types import BaseType, Field, FieldType, NestedField, Schema
 TYPE_PATTERN = re.compile(
     r"""
     ^
-    (?P<base>str|int|float|bool|list|dict|url|file|datetime)  # Base type
+    (?P<base>str|int|float|bool|list|dict|object|url|file|datetime)  # Base type
     (?:\[(?P<inner>[^\]]+)\])?              # Optional inner type or constraints
     (?P<optional>\?)?                        # Optional marker
     (?:\s*=\s*(?P<default>.+))?             # Optional default value
@@ -66,6 +66,7 @@ def parse_type_string(type_str: str) -> FieldType:
 
     constraints: tuple[str, ...] | None = None
     item_type: FieldType | None = None
+    value_type: FieldType | None = None
     min_value: int | float | None = None
     max_value: int | float | None = None
 
@@ -73,6 +74,24 @@ def parse_type_string(type_str: str) -> FieldType:
         if base == BaseType.LIST:
             # list[str] or list[int] etc.
             item_type = parse_type_string(inner)
+        elif base == BaseType.DICT:
+            # dict[str, int] or dict[str, str] etc.
+            parts = [p.strip() for p in inner.split(",", 1)]
+            if len(parts) == 2:
+                key_type_str, value_type_str = parts
+                if key_type_str != "str":
+                    raise SchemaError(
+                        f"dict keys must be 'str', got {key_type_str!r}"
+                    )
+                value_type = parse_type_string(value_type_str)
+            elif len(parts) == 1 and parts[0] == "str":
+                # dict[str] shorthand for dict[str, str]
+                value_type = parse_type_string("str")
+            else:
+                raise SchemaError(
+                    f"Invalid dict type specification: dict[{inner}]. "
+                    "Expected dict[str, <type>]."
+                )
         elif base == BaseType.STR:
             # str[a|b|c] - constraints
             if CONSTRAINT_PATTERN.match(inner):
@@ -120,6 +139,7 @@ def parse_type_string(type_str: str) -> FieldType:
         optional=optional,
         constraints=constraints,
         item_type=item_type,
+        value_type=value_type,
         default=default,
         has_default=has_default,
         min_value=min_value,
@@ -200,9 +220,23 @@ def _parse_field(name: str, value: Any) -> Field | NestedField:
                     optional=value.get("optional", False),
                 )
 
+        if "type" in value and value.get("type") == "object" and "fields" in value:
+            # Nested object structure
+            fields_def = value["fields"]
+            if isinstance(fields_def, dict):
+                nested_fields = tuple(
+                    _parse_field(n, v) for n, v in fields_def.items()
+                )
+                return NestedField(
+                    name=name,
+                    is_list=False,
+                    fields=nested_fields,
+                    optional=value.get("optional", False),
+                )
+
         raise SchemaError(
             f"Invalid nested field definition for {name!r}. "
-            "Nested fields must have 'type: list' and 'items' keys."
+            "Nested fields must have 'type: list' with 'items' or 'type: object' with 'fields'."
         )
 
     raise SchemaError(

@@ -1,0 +1,7 @@
+name: dict_test
+description: Schema for testing dict types
+fields:
+  id: str
+  metadata: dict?
+  tags: dict[str, str]?
+  scores: dict[str, int] = {}

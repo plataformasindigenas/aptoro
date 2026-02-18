@@ -4,7 +4,7 @@ from dataclasses import field as dataclass_field
 from dataclasses import make_dataclass
 from typing import Any, get_type_hints
 
-from aptoro.schema.types import BaseType, Field, FieldType, Schema
+from aptoro.schema.types import BaseType, Field, FieldType, NestedField, Schema
 
 
 def _python_type_for_field_type(field_type: FieldType) -> type:
@@ -26,6 +26,14 @@ def _python_type_for_field_type(field_type: FieldType) -> type:
             python_type: type = list[item_type]  # type: ignore
         else:
             python_type = list
+    elif field_type.base == BaseType.DICT:
+        if field_type.value_type:
+            val_type = _python_type_for_field_type(field_type.value_type)
+            python_type = dict[str, val_type]  # type: ignore
+        else:
+            python_type = dict
+    elif field_type.base == BaseType.OBJECT:
+        python_type = dict
     else:
         python_type = base_map.get(field_type.base, Any)
 
@@ -85,20 +93,41 @@ def generate_dataclass(schema: Schema) -> type:
     required_fields = []
     optional_fields = []
 
+    required_nested: list[NestedField] = []
+    optional_nested: list[NestedField] = []
+
     for f in schema.fields:
         if isinstance(f, Field):
             if f.is_required:
                 required_fields.append(f)
             else:
                 optional_fields.append(f)
-        # Skip NestedField for now - handled separately if needed
+        elif isinstance(f, NestedField):
+            if f.optional:
+                optional_nested.append(f)
+            else:
+                required_nested.append(f)
 
-    # Build field specs in correct order
+    # Build field specs in correct order (required first, then optional)
     for f in required_fields:
         fields_spec.append(_make_field_spec(f))
 
+    for nf in required_nested:
+        if nf.is_list:
+            python_type: type = list[dict]  # type: ignore
+        else:
+            python_type = dict
+        fields_spec.append((nf.name, python_type, dataclass_field()))
+
     for f in optional_fields:
         fields_spec.append(_make_field_spec(f))
+
+    for nf in optional_nested:
+        if nf.is_list:
+            python_type = list[dict] | None  # type: ignore
+        else:
+            python_type = dict | None  # type: ignore
+        fields_spec.append((nf.name, python_type, None))
 
     # Create class name from schema name (PascalCase)
     class_name = "".join(word.capitalize() for word in schema.name.split("_"))

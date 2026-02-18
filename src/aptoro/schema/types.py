@@ -20,6 +20,7 @@ class BaseType(Enum):
     URL = "url"
     FILE = "file"
     DATETIME = "datetime"
+    OBJECT = "object"
 
 
 @dataclass(frozen=True)
@@ -38,6 +39,7 @@ class FieldType:
     optional: bool = False
     constraints: tuple[str, ...] | None = None  # For enum values like str[a|b|c]
     item_type: "FieldType | None" = None  # For list[T]
+    value_type: "FieldType | None" = None  # For dict[str, V]
     default: Any = None
     has_default: bool = False
     min_value: int | float | None = None  # For int/float range constraints
@@ -47,6 +49,8 @@ class FieldType:
         result = self.base.value
         if self.item_type:
             result = f"{result}[{self.item_type}]"
+        elif self.value_type:
+            result = f"{result}[str, {self.value_type}]"
         elif self.min_value is not None or self.max_value is not None:
             min_str = str(self.min_value) if self.min_value is not None else ""
             max_str = str(self.max_value) if self.max_value is not None else ""
@@ -163,10 +167,16 @@ class Schema:
             if isinstance(f, Field):
                 return str(f.field_type)
             # NestedField
+            if f.is_list:
+                return {
+                    "type": "list",
+                    "optional": f.optional,
+                    "items": {nf.name: _field_to_value(nf) for nf in f.fields},
+                }
             return {
-                "type": "list" if f.is_list else "dict",
+                "type": "object",
                 "optional": f.optional,
-                "items": {nf.name: _field_to_value(nf) for nf in f.fields},
+                "fields": {nf.name: _field_to_value(nf) for nf in f.fields},
             }
 
         result: dict[str, Any] = {

@@ -1,10 +1,9 @@
 """Tests for the aptoro CLI."""
 
-import sys
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
+
 from aptoro.cli import main
 
 
