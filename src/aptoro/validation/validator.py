@@ -113,6 +113,24 @@ def _pydantic_type_for_field_type(field_type: FieldType) -> type:
     return python_type
 
 
+def _strip_null_defaults(record: dict[str, Any], schema: Schema) -> dict[str, Any]:
+    """Remove explicit None values for non-optional fields with defaults.
+
+    This lets Pydantic fill in the schema-defined default instead of
+    rejecting None as an invalid value.
+    """
+    result = record.copy()
+    for field in schema.fields:
+        if isinstance(field, Field) and (
+            field.name in result
+            and result[field.name] is None
+            and field.has_default
+            and not field.is_optional
+        ):
+            del result[field.name]
+    return result
+
+
 def _create_nested_pydantic_model(
     nested: NestedField, parent_name: str = ""
 ) -> type[BaseModel]:
@@ -283,6 +301,8 @@ def validate(
 
     for i, record in enumerate(data):
         try:
+            # Strip explicit nulls for fields with defaults
+            record = _strip_null_defaults(record, schema)
             # Validate with Pydantic
             validated = pydantic_model.model_validate(record)
 

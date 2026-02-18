@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from aptoro.errors import ValidationError
-from aptoro.schema import load_schema
+from aptoro.schema import load_schema, parse_schema
 from aptoro.validation import validate
 
 
@@ -235,3 +235,63 @@ class TestRangeConstraints:
         ]
         records = validate(data, schema)
         assert records[0].limit == 50
+
+
+class TestNullDefaults:
+    """Tests for explicit null handling on fields with defaults."""
+
+    def test_explicit_null_uses_int_default(self, sample_schema_path: Path) -> None:
+        schema = load_schema(sample_schema_path)
+        data = [
+            {
+                "id": "1",
+                "lemma": "hello",
+                "pos": "noun",
+                "definition": "a greeting",
+                "frequency": None,
+            }
+        ]
+        records = validate(data, schema)
+        assert records[0].frequency == 0
+
+    def test_explicit_null_uses_list_default(self) -> None:
+        schema = parse_schema(
+            {
+                "name": "test_list_default",
+                "fields": {
+                    "id": "str",
+                    "tags": "list[str] = []",
+                },
+            }
+        )
+        data = [{"id": "1", "tags": None}]
+        records = validate(data, schema)
+        assert records[0].tags == []
+
+    def test_explicit_null_optional_stays_none(self, sample_schema_path: Path) -> None:
+        schema = load_schema(sample_schema_path)
+        data = [
+            {
+                "id": "1",
+                "lemma": "hello",
+                "pos": "noun",
+                "definition": "a greeting",
+                "definition_pt": None,
+            }
+        ]
+        records = validate(data, schema)
+        assert records[0].definition_pt is None
+
+    def test_explicit_null_required_fails(self, sample_schema_path: Path) -> None:
+        schema = load_schema(sample_schema_path)
+        data = [
+            {
+                "id": "1",
+                "lemma": None,
+                "pos": "noun",
+                "definition": "a greeting",
+            }
+        ]
+        with pytest.raises(ValidationError) as exc_info:
+            validate(data, schema)
+        assert "lemma" in str(exc_info.value)
