@@ -96,6 +96,8 @@ def detect_format(source: str) -> str:
         return "yaml"
     if lower.endswith(".toml"):
         return "toml"
+    if lower.endswith(".md"):
+        return "frontmatter"
 
     raise SourceError(
         f"Cannot detect format from source: {source}. Please specify format explicitly."
