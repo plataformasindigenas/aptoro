@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-02-19
+
+### Added
+- Dict types in schemas: `dict`, `dict?`, `dict[str, int]`, `dict[str, str] = {}`, `dict[str]` shorthand.
+- Nested object types: `type: object` with `fields` block for structured sub-documents.
+- Front-matter reader for markdown files with YAML front matter (`.md` auto-detected).
+- Glob pattern support in `read()`: `read("data/*.md")` reads and concatenates multiple files.
+- `ValidationError.summary(max_errors=10)` for truncated error output.
+- Null coalescing: explicit `null` on fields with defaults applies the schema default instead of failing.
+
+### Changed
+- CLI validation errors now use `summary()` (truncated to 10 errors by default).
+- CLI `--format` choices now include `frontmatter`.
+
 ## [0.3.1] - 2026-01-23
 
 ### Added

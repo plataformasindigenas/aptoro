@@ -79,7 +79,7 @@ def detect_format(source: str) -> str:
         source: URL or file path
 
     Returns:
-        Format string: 'csv', 'json', 'yaml', or 'toml'
+        Format string: 'csv', 'json', 'yaml', 'toml', or 'frontmatter'
 
     Raises:
         SourceError: If format cannot be detected

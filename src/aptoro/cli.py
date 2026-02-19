@@ -35,7 +35,7 @@ def parse_args(args: list[str] | None = None) -> argparse.Namespace:
     # Validate command
     validate_parser = subparsers.add_parser("validate", help="Validate data against a schema")
     validate_parser.add_argument(
-        "source", help="Path or URL to the data file (CSV, JSON, YAML, TOML)"
+        "source", help="Path or URL to the data file (CSV, JSON, YAML, TOML, Markdown)"
     )
     validate_parser.add_argument(
         "--schema", "-s", required=True, help="Path to the YAML schema file"
@@ -43,7 +43,7 @@ def parse_args(args: list[str] | None = None) -> argparse.Namespace:
     validate_parser.add_argument(
         "--format",
         "-f",
-        choices=["csv", "json", "yaml", "toml"],
+        choices=["csv", "json", "yaml", "toml", "frontmatter"],
         help="Explicit data format (default: auto-detect)",
     )
 

@@ -13,7 +13,9 @@ It is a minimal, functional Python ETL library for reading, validating, and tran
 
 - **Schema-First:** Define your data model in simple, readable YAML.
 - **Strict Validation:** Ensures data quality with type checks, constraints, and range validation.
-- **Rich Types:** Built-in support for `datetime` (ISO 8601), `url`, `file`, and standard primitives.
+- **Rich Types:** Built-in support for `datetime` (ISO 8601), `url`, `file`, `dict`, nested objects, and standard primitives.
+- **Multi-Format:** CSV, JSON, YAML, TOML, and Markdown front-matter (Jekyll/Hugo/Obsidian style).
+- **Glob Patterns:** Read multiple files at once with `read("data/*.md")`.
 - **Functional API:** Pure functions and immutable dataclasses make pipelines predictable.
 - **Zero Boilerplate:** No complex class definitions—just load your schema and go.
 
@@ -84,11 +86,14 @@ fields:
 - **Basic types:** `str`, `int`, `float`, `bool`
 - **Specialized types:** `url`, `file`, `datetime`
 - **Optional:** `str?`, `int?`, `url?`, `datetime?`
-- **Default value:** `str = "default"`, `int = 0`, `datetime = "2024-01-01"`
+- **Default value:** `str = "default"`, `int = 0`, `list[str] = []`, `dict[str, int] = {}`
 - **Constrained:** `str[a|b|c]`
+- **Ranges:** `int[0..120]`, `float[0.0..1.0]`
 - **Lists:** `list[str]`, `list[int]`
+- **Dicts:** `dict`, `dict[str, int]`, `dict[str]`
+- **Nested objects:** `type: object` with `fields` block
 
-See [DOCS.md](DOCS.md) for full syntax, including inheritance and nested structures.
+See [DOCS.md](DOCS.md) for full syntax, including inheritance, nested structures, and front-matter reading.
 
 ## Supported Formats
 
@@ -96,6 +101,7 @@ See [DOCS.md](DOCS.md) for full syntax, including inheritance and nested structu
 - **JSON**
 - **YAML**
 - **TOML**
+- **Markdown front-matter** (`.md` files with YAML front matter)
 
 ## License
 
