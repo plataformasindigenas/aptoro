@@ -85,6 +85,39 @@ class ValidationError(AptoroError):
             FieldError(field=field, expected=expected, got=got, row=row, column=column)
         )
 
+    def summary(self, *, max_errors: int = 10) -> str:
+        """Format a summary of validation errors, truncating if needed.
+
+        Args:
+            max_errors: Maximum number of individual errors to display.
+                        Remaining errors are summarized as a count.
+
+        Returns:
+            Formatted error summary string.
+        """
+        error_count = len(self.errors)
+        lines = [f"Validation failed with {error_count} error(s)"]
+
+        if self.source:
+            lines.append(f"Source: {self.source}")
+        if self.schema_name:
+            lines.append(f"Schema: {self.schema_name}")
+
+        lines.append("")
+
+        shown = min(error_count, max_errors)
+        for i, error in enumerate(self.errors[:max_errors], 1):
+            lines.append(f"Error {i}/{error_count}:")
+            lines.append(str(error))
+            lines.append("")
+
+        remaining = error_count - shown
+        if remaining > 0:
+            lines.append(f"... and {remaining} more error(s)")
+            lines.append("")
+
+        return "\n".join(lines)
+
     def has_errors(self) -> bool:
         """Check if there are any errors."""
         return len(self.errors) > 0

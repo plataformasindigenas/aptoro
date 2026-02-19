@@ -4,7 +4,7 @@ import argparse
 import sys
 
 from aptoro import load
-from aptoro.errors import AptoroError
+from aptoro.errors import AptoroError, ValidationError
 
 
 def validate_command(args: argparse.Namespace) -> None:
@@ -17,6 +17,9 @@ def validate_command(args: argparse.Namespace) -> None:
             collect_errors=True,
         )
         print("Validation successful.")
+    except ValidationError as e:
+        print(f"Error: {e.summary()}", file=sys.stderr)
+        sys.exit(1)
     except AptoroError as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)

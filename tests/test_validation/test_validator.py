@@ -295,3 +295,66 @@ class TestNullDefaults:
         with pytest.raises(ValidationError) as exc_info:
             validate(data, schema)
         assert "lemma" in str(exc_info.value)
+
+
+class TestValidationErrorSummary:
+    """Tests for ValidationError.summary() method."""
+
+    def _make_error(self, n: int) -> ValidationError:
+        """Create a ValidationError with n FieldErrors."""
+        err = ValidationError(source="test.csv", schema_name="test_schema")
+        for i in range(n):
+            err.add_error(
+                field=f"field_{i}",
+                expected="str",
+                got=str(i),
+                row=i + 1,
+            )
+        return err
+
+    def test_summary_fewer_than_max(self):
+        err = self._make_error(3)
+        text = err.summary(max_errors=10)
+        assert "3 error(s)" in text
+        assert "field_0" in text
+        assert "field_1" in text
+        assert "field_2" in text
+        assert "more error" not in text
+
+    def test_summary_exactly_max(self):
+        err = self._make_error(5)
+        text = err.summary(max_errors=5)
+        assert "5 error(s)" in text
+        assert "field_4" in text
+        assert "more error" not in text
+
+    def test_summary_more_than_max(self):
+        err = self._make_error(15)
+        text = err.summary(max_errors=10)
+        assert "15 error(s)" in text
+        # First 10 shown
+        assert "field_0" in text
+        assert "field_9" in text
+        # 11th not shown
+        assert "field_10" not in text
+        assert "... and 5 more error(s)" in text
+
+    def test_summary_default_max_is_10(self):
+        err = self._make_error(12)
+        text = err.summary()
+        assert "field_9" in text
+        assert "field_10" not in text
+        assert "... and 2 more error(s)" in text
+
+    def test_summary_includes_source_and_schema(self):
+        err = self._make_error(1)
+        text = err.summary()
+        assert "Source: test.csv" in text
+        assert "Schema: test_schema" in text
+
+    def test_summary_max_errors_one(self):
+        err = self._make_error(3)
+        text = err.summary(max_errors=1)
+        assert "field_0" in text
+        assert "field_1" not in text
+        assert "... and 2 more error(s)" in text
