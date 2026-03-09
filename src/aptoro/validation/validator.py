@@ -1,5 +1,6 @@
 """Data validation against schemas using Pydantic."""
 
+import re
 import urllib.error
 import urllib.request
 from datetime import UTC, datetime
@@ -90,6 +91,21 @@ def _pydantic_type_for_field_type(field_type: FieldType) -> type:
         python_type = Annotated[str, AfterValidator(validate_file)]  # type: ignore[assignment]
     elif field_type.base == BaseType.DATETIME:
         python_type = Annotated[str, AfterValidator(validate_datetime)]  # type: ignore[assignment]
+    elif field_type.base == BaseType.STR and field_type.pattern:
+        # Create regex-validated string type
+        compiled = re.compile(field_type.pattern)
+
+        def make_validator(pat: re.Pattern[str]) -> Any:
+            def validate_pattern(value: str) -> str:
+                if not pat.fullmatch(value):
+                    raise ValueError(
+                        f"String does not match pattern /{pat.pattern}/"
+                    )
+                return value
+
+            return validate_pattern
+
+        python_type = Annotated[str, AfterValidator(make_validator(compiled))]  # type: ignore[assignment]
     elif field_type.base == BaseType.STR and field_type.constraints:
         # Create Literal type for enum values
         python_type = Literal[field_type.constraints]  # type: ignore[assignment]
@@ -325,6 +341,25 @@ def validate(
 
             if not collect_errors:
                 validation_error.raise_if_errors()
+
+    # Check primary key uniqueness
+    pk_field = schema.get_field(schema.primary_key)
+    if pk_field is not None and isinstance(pk_field, Field):
+        seen: dict[Any, int] = {}  # value → first row number
+        for i, instance in enumerate(results):
+            pk_value = getattr(instance, schema.primary_key, None)
+            if pk_value is None:
+                continue
+            if pk_value in seen:
+                validation_error.add_error(
+                    field=schema.primary_key,
+                    expected="unique value (primary key)",
+                    got=f"{pk_value!r} (duplicate of row {seen[pk_value]})",
+                    row=i + 1,
+                    column=schema.primary_key,
+                )
+            else:
+                seen[pk_value] = i + 1
 
     # Raise collected errors at the end
     validation_error.raise_if_errors()

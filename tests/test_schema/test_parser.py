@@ -212,9 +212,55 @@ class TestParseTypeString:
         with pytest.raises(SchemaError, match="Invalid range specification"):
             parse_type_string("int[1|10]")
 
+    def test_str_with_hyphenated_constraints(self) -> None:
+        ft = parse_type_string("str[ritual|estrutura-central|designação-clânica]")
+        assert ft.constraints == ("ritual", "estrutura-central", "designação-clânica")
+
+    def test_str_with_accented_constraints(self) -> None:
+        ft = parse_type_string("str[café|naïve|résumé]")
+        assert ft.constraints == ("café", "naïve", "résumé")
+
+    def test_str_with_spaces_in_constraints(self) -> None:
+        ft = parse_type_string("str[hello world|foo bar]")
+        assert ft.constraints == ("hello world", "foo bar")
+
+    def test_str_empty_constraint_segment_raises(self) -> None:
+        with pytest.raises(SchemaError, match="non-empty pipe-separated"):
+            parse_type_string("str[a||b]")
+
+    def test_str_leading_pipe_raises(self) -> None:
+        with pytest.raises(SchemaError, match="non-empty pipe-separated"):
+            parse_type_string("str[|a|b]")
+
+    def test_str_with_regex_pattern(self) -> None:
+        ft = parse_type_string("str[/^[a-z0-9-]+$/]")
+        assert ft.base == BaseType.STR
+        assert ft.pattern == "^[a-z0-9-]+$"
+        assert ft.constraints is None
+
+    def test_str_with_invalid_regex_raises(self) -> None:
+        with pytest.raises(SchemaError, match="Invalid regex pattern"):
+            parse_type_string("str[/(/]")
+
+    def test_str_with_unbalanced_bracket_regex_raises(self) -> None:
+        with pytest.raises(SchemaError):
+            parse_type_string("str[/[unclosed/]")
+
+    def test_str_regex_optional(self) -> None:
+        ft = parse_type_string("str[/^[a-z]+$/]?")
+        assert ft.pattern == "^[a-z]+$"
+        assert ft.optional
+
+    def test_str_regex_with_default(self) -> None:
+        ft = parse_type_string('str[/^\\d{4}$/] = "0000"')
+        assert ft.pattern == "^\\d{4}$"
+        assert ft.has_default
+        assert ft.default == "0000"
+
     def test_range_not_supported_for_str(self) -> None:
-        with pytest.raises(SchemaError, match="Invalid constraint specification"):
-            parse_type_string("str[1..10]")
+        # 1..10 is now treated as a valid constraint value (no longer errors)
+        ft = parse_type_string("str[1..10]")
+        assert ft.constraints == ("1..10",)
 
 
 class TestLoadSchema:

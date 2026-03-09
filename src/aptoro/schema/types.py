@@ -38,6 +38,7 @@ class FieldType:
     base: BaseType
     optional: bool = False
     constraints: tuple[str, ...] | None = None  # For enum values like str[a|b|c]
+    pattern: str | None = None  # For regex patterns like str[/^[a-z]+$/]
     item_type: "FieldType | None" = None  # For list[T]
     value_type: "FieldType | None" = None  # For dict[str, V]
     default: Any = None
@@ -55,6 +56,8 @@ class FieldType:
             min_str = str(self.min_value) if self.min_value is not None else ""
             max_str = str(self.max_value) if self.max_value is not None else ""
             result = f"{result}[{min_str}..{max_str}]"
+        elif self.pattern:
+            result = f"{result}[/{self.pattern}/]"
         elif self.constraints:
             result = f"{result}[{'|'.join(self.constraints)}]"
         if self.optional:

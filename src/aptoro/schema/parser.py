@@ -24,7 +24,7 @@ TYPE_PATTERN = re.compile(
     r"""
     ^
     (?P<base>str|int|float|bool|list|dict|object|url|file|datetime)  # Base type
-    (?:\[(?P<inner>[^\]]+)\])?              # Optional inner type or constraints
+    (?:\[(?P<inner>[^\[\]]*(?:\[[^\]]*\][^\[\]]*)*)\])?  # Inner (handles one level of nested [])
     (?P<optional>\?)?                        # Optional marker
     (?:\s*=\s*(?P<default>.+))?             # Optional default value
     $
@@ -32,7 +32,6 @@ TYPE_PATTERN = re.compile(
     re.VERBOSE,
 )
 
-CONSTRAINT_PATTERN = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*(?:\|[a-zA-Z_][a-zA-Z0-9_]*)*$")
 RANGE_PATTERN = re.compile(r"^(?P<min>-?\d+\.?\d*)?\.\.(?P<max>-?\d+\.?\d*)?$")
 
 
@@ -65,6 +64,7 @@ def parse_type_string(type_str: str) -> FieldType:
         raise SchemaError(f"Unknown base type: {base_str!r}")
 
     constraints: tuple[str, ...] | None = None
+    pattern: str | None = None
     item_type: FieldType | None = None
     value_type: FieldType | None = None
     min_value: int | float | None = None
@@ -93,14 +93,24 @@ def parse_type_string(type_str: str) -> FieldType:
                     "Expected dict[str, <type>]."
                 )
         elif base == BaseType.STR:
-            # str[a|b|c] - constraints
-            if CONSTRAINT_PATTERN.match(inner):
-                constraints = tuple(inner.split("|"))
+            if inner.startswith("/") and inner.endswith("/") and len(inner) >= 2:
+                # str[/regex/] - regex pattern
+                raw_pattern = inner[1:-1]
+                try:
+                    re.compile(raw_pattern)
+                except re.error as e:
+                    raise SchemaError(f"Invalid regex pattern: {inner!r}: {e}")
+                pattern = raw_pattern
             else:
-                raise SchemaError(
-                    f"Invalid constraint specification: {inner!r}. "
-                    "Constraints must be pipe-separated identifiers."
-                )
+                # str[a|b|c] - enum constraints
+                parts = [p.strip() for p in inner.split("|")]
+                if all(parts):  # no empty segments
+                    constraints = tuple(parts)
+                else:
+                    raise SchemaError(
+                        f"Invalid constraint specification: {inner!r}. "
+                        "Constraints must be non-empty pipe-separated values."
+                    )
         elif base in (BaseType.INT, BaseType.FLOAT):
             # int[1..10] or float[0.5..2.5] - range constraints
             range_match = RANGE_PATTERN.match(inner)
@@ -138,6 +148,7 @@ def parse_type_string(type_str: str) -> FieldType:
         base=base,
         optional=optional,
         constraints=constraints,
+        pattern=pattern,
         item_type=item_type,
         value_type=value_type,
         default=default,

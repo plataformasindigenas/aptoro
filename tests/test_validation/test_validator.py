@@ -358,3 +358,138 @@ class TestValidationErrorSummary:
         assert "field_0" in text
         assert "field_1" not in text
         assert "... and 2 more error(s)" in text
+
+
+class TestRegexPatternValidation:
+    """Tests for str[/regex/] pattern validation."""
+
+    def test_validate_regex_pattern_pass(self) -> None:
+        schema = parse_schema(
+            {
+                "name": "test_regex",
+                "fields": {
+                    "id": "str",
+                    "slug": "str[/^[a-z0-9-]+$/]",
+                },
+            }
+        )
+        records = validate(
+            [{"id": "1", "slug": "hello-world-123"}], schema
+        )
+        assert records[0].slug == "hello-world-123"
+
+    def test_validate_regex_pattern_fail(self) -> None:
+        schema = parse_schema(
+            {
+                "name": "test_regex",
+                "fields": {
+                    "id": "str",
+                    "slug": "str[/^[a-z0-9-]+$/]",
+                },
+            }
+        )
+        with pytest.raises(ValidationError) as exc_info:
+            validate([{"id": "1", "slug": "Hello World!"}], schema)
+        assert "slug" in str(exc_info.value)
+
+    def test_validate_regex_pattern_optional_none(self) -> None:
+        schema = parse_schema(
+            {
+                "name": "test_regex",
+                "fields": {
+                    "id": "str",
+                    "code": "str[/^[A-Z]{3}$/]?",
+                },
+            }
+        )
+        records = validate([{"id": "1", "code": None}], schema)
+        assert records[0].code is None
+
+
+class TestPrimaryKeyUniqueness:
+    """Tests for primary key uniqueness enforcement."""
+
+    def test_validate_primary_key_unique_passes(self) -> None:
+        schema = parse_schema(
+            {"name": "test_pk", "fields": {"id": "str", "name": "str"}}
+        )
+        data = [
+            {"id": "1", "name": "Alice"},
+            {"id": "2", "name": "Bob"},
+        ]
+        records = validate(data, schema)
+        assert len(records) == 2
+
+    def test_validate_primary_key_duplicate_fails(self) -> None:
+        schema = parse_schema(
+            {"name": "test_pk", "fields": {"id": "str", "name": "str"}}
+        )
+        data = [
+            {"id": "1", "name": "Alice"},
+            {"id": "1", "name": "Bob"},
+        ]
+        with pytest.raises(ValidationError) as exc_info:
+            validate(data, schema)
+        assert "id" in str(exc_info.value)
+
+    def test_validate_primary_key_duplicate_error_message(self) -> None:
+        schema = parse_schema(
+            {"name": "test_pk", "fields": {"id": "str", "name": "str"}}
+        )
+        data = [
+            {"id": "dup", "name": "Alice"},
+            {"id": "other", "name": "Bob"},
+            {"id": "dup", "name": "Carol"},
+        ]
+        with pytest.raises(ValidationError) as exc_info:
+            validate(data, schema, collect_errors=True)
+        err_str = str(exc_info.value)
+        assert "unique value" in err_str
+        assert "duplicate of row 1" in err_str
+
+    def test_validate_primary_key_field_not_in_schema_skips(self) -> None:
+        schema = parse_schema(
+            {
+                "name": "test_pk",
+                "primary_key": "nonexistent",
+                "fields": {"id": "str", "name": "str"},
+            }
+        )
+        data = [
+            {"id": "1", "name": "Alice"},
+            {"id": "1", "name": "Bob"},
+        ]
+        # No uniqueness check since primary_key field doesn't exist
+        records = validate(data, schema)
+        assert len(records) == 2
+
+    def test_validate_primary_key_custom_field(self) -> None:
+        schema = parse_schema(
+            {
+                "name": "test_pk",
+                "primary_key": "slug",
+                "fields": {"id": "str", "slug": "str"},
+            }
+        )
+        data = [
+            {"id": "1", "slug": "hello"},
+            {"id": "2", "slug": "hello"},
+        ]
+        with pytest.raises(ValidationError) as exc_info:
+            validate(data, schema)
+        assert "slug" in str(exc_info.value)
+
+    def test_validate_primary_key_with_collect_errors(self) -> None:
+        schema = parse_schema(
+            {"name": "test_pk", "fields": {"id": "str", "value": "int"}}
+        )
+        data = [
+            {"id": "1", "value": "not_int"},  # field error
+            {"id": "2", "value": 10},
+            {"id": "2", "value": 20},  # duplicate
+        ]
+        with pytest.raises(ValidationError) as exc_info:
+            validate(data, schema, collect_errors=True)
+        errors = exc_info.value.errors
+        # Should have both field error and duplicate error
+        assert len(errors) >= 2
