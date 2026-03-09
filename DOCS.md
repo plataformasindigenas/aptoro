@@ -1,6 +1,6 @@
 # Aptoro Documentation
 
-**Version 0.4.0**
+**Version 0.5.0**
 
 Aptoro is a minimal, functional Python ETL library for reading, validating, and transforming data using YAML schemas. It was designed for linguistic data projects but works with any tabular data.
 
@@ -1119,4 +1119,4 @@ GPLv3
 
 ---
 
-*Documentation for Aptoro v0.4.0 — A project of Plataformas Indigenas*
+*Documentation for Aptoro v0.5.0 — A project of Plataformas Indigenas*

@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-03-09
+
+### Added
+- Regex pattern validation for string fields using `str[/regex/]` schema syntax.
+- Primary key uniqueness enforcement during validation.
+
+### Changed
+- String enum constraints now accept any non-empty pipe-separated values (including spaces, hyphens, and Unicode characters).
+
 ## [0.4.0] - 2026-02-19
 
 ### Added
@@ -70,4 +79,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TabulaError renamed to AptoroError
 - Updated all documentation and imports
 
+[0.5.0]: https://github.com/plataformasindigenas/aptoro/releases/tag/v0.5.0
+[0.4.0]: https://github.com/plataformasindigenas/aptoro/releases/tag/v0.4.0
+[0.3.1]: https://github.com/plataformasindigenas/aptoro/releases/tag/v0.3.1
+[0.3.0]: https://github.com/plataformasindigenas/aptoro/releases/tag/v0.3.0
+[0.2.0]: https://github.com/plataformasindigenas/aptoro/releases/tag/v0.2.0
 [0.1.0]: https://github.com/plataformasindigenas/aptoro/releases/tag/v0.1.0
